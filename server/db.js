@@ -5,6 +5,7 @@ const defaultData = {
     users: [],
     circulars: [],
     chats: [],
+    messages: [],
     classes: [],
     orders: []
 }

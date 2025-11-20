@@ -58,13 +58,17 @@ router.delete('/users/:userId', isAdmin, async (req, res) => {
 
     // Also clean up related data
     // Remove from chats
-    db.data.chats = db.data.chats.filter(chat => {
-        chat.members = chat.members.filter(memberId => memberId !== userId);
-        return chat.members.length > 0; // Remove empty chats
-    });
+    if (db.data.chats) {
+        db.data.chats = db.data.chats.filter(chat => {
+            chat.members = chat.members.filter(memberId => memberId !== userId);
+            return chat.members.length > 0; // Remove empty chats
+        });
+    }
 
     // Remove messages
-    db.data.messages = db.data.messages.filter(msg => msg.senderId !== userId);
+    if (db.data.messages) {
+        db.data.messages = db.data.messages.filter(msg => msg.senderId !== userId);
+    }
 
     // Remove from classes
     if (db.data.classes) {

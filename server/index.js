@@ -58,6 +58,11 @@ io.on('connection', (socket) => {
         console.log(`User ${socket.id} joined room ${roomId}`);
     });
 
+    socket.on('register_user', (userId) => {
+        socket.join(userId);
+        console.log(`User ${socket.id} registered as ${userId}`);
+    });
+
     socket.on('send_message', async (data) => {
         // data = { roomId, senderId, senderName, content, timestamp, messageType, fileUrl, fileName }
 
@@ -81,7 +86,8 @@ io.on('connection', (socket) => {
             ...data,
             id: Date.now().toString(),
             isDeleted: false,
-            isForwarded: data.isForwarded || false
+            isForwarded: data.isForwarded || false,
+            readBy: [data.senderId]
         };
 
         // Save to DB
@@ -91,6 +97,16 @@ io.on('connection', (socket) => {
 
         // Broadcast to room
         io.to(data.roomId).emit('receive_message', message);
+
+        // Notify members (for unread count)
+        chat.members.forEach(memberId => {
+            if (memberId !== data.senderId) {
+                io.to(memberId).emit('new_message_notification', {
+                    roomId: data.roomId,
+                    messageId: message.id
+                });
+            }
+        });
     });
 
     socket.on('delete_group', async (data) => {

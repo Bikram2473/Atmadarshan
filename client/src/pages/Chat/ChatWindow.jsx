@@ -61,6 +61,10 @@ export default function ChatWindow() {
         if (socket && activeChat) {
             socket.emit('join_room', activeChat.id);
             fetchMessages(activeChat.id);
+
+            // Mark messages as read
+            api.post(`/api/chat/mark-read/${activeChat.id}`, { userId: user.id })
+                .catch(err => console.error("Failed to mark messages as read", err));
         }
     }, [socket, activeChat]);
 

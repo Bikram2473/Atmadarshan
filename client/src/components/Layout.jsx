@@ -11,25 +11,85 @@ import {
     CreditCard,
     Users
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/logo.png';
+import io from 'socket.io-client';
+import api from '../api/axios';
 
 export default function Layout() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [socket, setSocket] = useState(null);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    // Fetch unread count and setup socket
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchUnreadCount = async () => {
+            try {
+                const res = await api.get(`/api/chat/unread-count/${user.id}`);
+                setUnreadCount(res.data.unreadCount);
+            } catch (error) {
+                console.error("Failed to fetch unread count", error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000');
+        setSocket(newSocket);
+
+        newSocket.on('connect', () => {
+            newSocket.emit('register_user', user.id);
+        });
+
+        newSocket.on('new_message_notification', () => {
+            // Increment unread count if not currently on the chat page
+            // Or even if on chat page but not in that specific chat (simplified: just increment, ChatWindow will clear it)
+            if (!location.pathname.includes('/chat')) {
+                setUnreadCount(prev => prev + 1);
+            } else {
+                // If on chat page, we might still want to increment if not in the specific room
+                // But for now, let's re-fetch to be accurate
+                fetchUnreadCount();
+            }
+        });
+
+        return () => newSocket.close();
+    }, [user, location.pathname]);
+
+    // Clear unread count when entering chat page (optional, or handle per-chat in ChatWindow)
+    // We'll handle specific chat clearing in ChatWindow, but maybe re-fetch here when location changes
+    useEffect(() => {
+        if (location.pathname === '/chat' && user) {
+            // We don't clear all, only when specific chat opens.
+            // But we can re-fetch to ensure accuracy
+            const fetchUnreadCount = async () => {
+                try {
+                    const res = await api.get(`/api/chat/unread-count/${user.id}`);
+                    setUnreadCount(res.data.unreadCount);
+                } catch (error) {
+                    console.error("Failed to fetch unread count", error);
+                }
+            };
+            fetchUnreadCount();
+        }
+    }, [location.pathname, user]);
+
+
     const navItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-        { icon: MessageSquare, label: 'Chat', path: '/chat', adminHidden: true },
+        { icon: MessageSquare, label: 'Chat', path: '/chat', adminHidden: true, badge: unreadCount },
         { icon: Video, label: 'Classes', path: '/classes' },
         { icon: CreditCard, label: 'Payments', path: '/payments' },
         { icon: Settings, label: 'Settings', path: '/settings' },
@@ -87,12 +147,17 @@ export default function Layout() {
                                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                         />
                                     )}
-                                    <span className="relative z-10 flex items-center">
+                                    <span className="relative z-10 flex items-center w-full">
                                         <Icon size={22} className={clsx(
                                             "mr-3 transition-colors",
                                             isActive ? "text-primary-600" : "text-secondary-400 group-hover:text-primary-500"
                                         )} />
                                         {item.label}
+                                        {item.badge > 0 && (
+                                            <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                                                {item.badge > 99 ? '99+' : item.badge}
+                                            </span>
+                                        )}
                                     </span>
                                 </Link>
                             );

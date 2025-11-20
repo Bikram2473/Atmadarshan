@@ -404,6 +404,51 @@ router.post('/messages/forward', requireNonAdmin, async (req, res) => {
     });
 });
 
+// Get unread message count for a user
+router.get('/unread-count/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    await db.read();
+
+    // Get all chats where user is a member
+    const userChats = (db.data.chats || []).filter(c => c.members.includes(userId));
+    const userChatIds = userChats.map(c => c.id);
+
+    // Count messages in these chats that are NOT read by the user
+    const unreadCount = (db.data.messages || []).filter(m =>
+        userChatIds.includes(m.roomId) &&
+        m.senderId !== userId && // Don't count own messages
+        (!m.readBy || !m.readBy.includes(userId))
+    ).length;
+
+    res.json({ unreadCount });
+});
+
+// Mark messages in a room as read
+router.post('/mark-read/:roomId', async (req, res) => {
+    const { roomId } = req.params;
+    const { userId } = req.body;
+
+    await db.read();
+
+    let updated = false;
+    (db.data.messages || []).forEach(m => {
+        if (m.roomId === roomId && m.senderId !== userId) {
+            if (!m.readBy) m.readBy = [];
+            if (!m.readBy.includes(userId)) {
+                m.readBy.push(userId);
+                updated = true;
+            }
+        }
+    });
+
+    if (updated) {
+        await db.write();
+    }
+
+    res.json({ success: true });
+});
+
 // Upload File/Image
 router.post('/messages/upload', requireNonAdmin, upload.single('file'), async (req, res) => {
     try {

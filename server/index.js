@@ -3,12 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import db from './db.js';
+import connectDB from './db.js';
+import User from './models/User.js';
+import Message from './models/Message.js';
+import Chat from './models/Chat.js';
 import authRoutes from './routes/auth.js';
 import circularsRoutes from './routes/circulars.js';
 import chatRoutes from './routes/chat.js';
 import classesRoutes from './routes/classes.js';
-
 import settingsRoutes from './routes/settings.js';
 import adminRoutes from './routes/admin.js';
 import bugsRoutes from './routes/bugs.js';
@@ -44,7 +46,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/circulars', circularsRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/classes', classesRoutes);
-
 app.use('/api/settings', settingsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/bugs', bugsRoutes);
@@ -67,8 +68,7 @@ io.on('connection', (socket) => {
         // data = { roomId, senderId, senderName, content, timestamp, messageType, fileUrl, fileName }
 
         // Check if sender is admin and block them
-        await db.read();
-        const sender = db.data.users.find(u => u.id === data.senderId);
+        const sender = await User.findOne({ id: data.senderId });
 
         if (sender && sender.role === 'admin') {
             socket.emit('message_error', { message: 'Chat access is restricted to teachers and students only' });
@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
         }
 
         // Check if sender is a member of the chat
-        const chat = db.data.chats.find(c => c.id === data.roomId);
+        const chat = await Chat.findOne({ id: data.roomId });
         if (!chat || !chat.members.includes(data.senderId)) {
             socket.emit('message_error', { message: 'You do not have access to this chat' });
             return;
@@ -91,9 +91,7 @@ io.on('connection', (socket) => {
         };
 
         // Save to DB
-        if (!db.data.messages) db.data.messages = [];
-        db.data.messages.push(message);
-        await db.write();
+        await Message.create(message);
 
         // Broadcast to room
         io.to(data.roomId).emit('receive_message', message);
@@ -111,9 +109,7 @@ io.on('connection', (socket) => {
 
     socket.on('delete_group', async (data) => {
         // data = { groupId, userId }
-        await db.read();
-
-        const group = db.data.chats.find(c => c.id === data.groupId && c.isGroup);
+        const group = await Chat.findOne({ id: data.groupId, isGroup: true });
 
         if (group && group.createdBy === data.userId) {
             // Notify all members
@@ -132,9 +128,7 @@ io.on('connection', (socket) => {
 
     socket.on('delete_message', async (data) => {
         // data = { messageId, roomId, userId }
-        await db.read();
-
-        const message = db.data.messages.find(m => m.id === data.messageId);
+        const message = await Message.findOne({ id: data.messageId });
 
         if (message && message.senderId === data.userId) {
             // Notify all members in the room
@@ -160,6 +154,12 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Connect to MongoDB and start server
+connectDB().then(() => {
+    httpServer.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}).catch(err => {
+    console.error('Failed to connect to MongoDB:', err);
+    process.exit(1);
 });

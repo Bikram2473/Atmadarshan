@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../db.js';
+import Circular from '../models/Circular.js';
 import { nanoid } from 'nanoid';
 import multer from 'multer';
 import path from 'path';
@@ -30,9 +30,7 @@ const upload = multer({ storage: storage });
 
 // Get all circulars
 router.get('/', async (req, res) => {
-    await db.read();
-    // Sort by date desc
-    const circulars = [...(db.data.circulars || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const circulars = await Circular.find().sort({ createdAt: -1 });
     res.json(circulars);
 });
 
@@ -56,10 +54,7 @@ router.post('/', upload.single('file'), async (req, res) => {
         fileType: file ? file.mimetype : null
     };
 
-    await db.read();
-    if (!db.data.circulars) db.data.circulars = [];
-    db.data.circulars.push(newCircular);
-    await db.write();
+    await Circular.create(newCircular);
 
     res.status(201).json(newCircular);
 });
@@ -67,14 +62,11 @@ router.post('/', upload.single('file'), async (req, res) => {
 // Delete circular (Teacher only)
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    await db.read();
 
-    const circularIndex = db.data.circulars.findIndex(c => c.id === id);
-    if (circularIndex === -1) {
+    const circular = await Circular.findOne({ id });
+    if (!circular) {
         return res.status(404).json({ message: 'Circular not found' });
     }
-
-    const circular = db.data.circulars[circularIndex];
 
     // Delete file if exists
     if (circular.fileUrl) {
@@ -88,8 +80,7 @@ router.delete('/:id', async (req, res) => {
         }
     }
 
-    db.data.circulars.splice(circularIndex, 1);
-    await db.write();
+    await Circular.deleteOne({ id });
 
     res.json({ message: 'Circular deleted successfully' });
 });
@@ -100,14 +91,11 @@ router.put('/:id', upload.single('file'), async (req, res) => {
     const { title, content } = req.body;
     const file = req.file;
 
-    await db.read();
-    const circularIndex = db.data.circulars.findIndex(c => c.id === id);
+    const circular = await Circular.findOne({ id });
 
-    if (circularIndex === -1) {
+    if (!circular) {
         return res.status(404).json({ message: 'Circular not found' });
     }
-
-    const circular = db.data.circulars[circularIndex];
 
     // Update fields
     if (title) circular.title = title;
@@ -132,8 +120,7 @@ router.put('/:id', upload.single('file'), async (req, res) => {
         circular.fileType = file.mimetype;
     }
 
-    db.data.circulars[circularIndex] = circular;
-    await db.write();
+    await circular.save();
 
     res.json(circular);
 });

@@ -1,5 +1,6 @@
 import express from 'express';
-import db from '../db.js';
+import Class from '../models/Class.js';
+import User from '../models/User.js';
 import { nanoid } from 'nanoid';
 
 const router = express.Router();
@@ -8,12 +9,11 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     const { userId } = req.query; // Get userId from query params
 
-    await db.read();
-    let classes = db.data.classes || [];
+    let classes = await Class.find();
 
     // If userId is provided, filter classes based on visibility rules
     if (userId) {
-        const user = db.data.users.find(u => u.id === userId);
+        const user = await User.findOne({ id: userId });
 
         if (user && user.role === 'student') {
             // For students: only show classes where they are tagged OR classes with no tags
@@ -34,10 +34,7 @@ router.get('/', async (req, res) => {
 
 // Get all students (for tagging)
 router.get('/students', async (req, res) => {
-    await db.read();
-    const students = db.data.users
-        .filter(u => u.role === 'student')
-        .map(({ id, name, email }) => ({ id, name, email }));
+    const students = await User.find({ role: 'student' }).select('id name email -_id');
     res.json(students);
 });
 
@@ -62,10 +59,7 @@ router.post('/', async (req, res) => {
         createdAt: new Date().toISOString()
     };
 
-    await db.read();
-    if (!db.data.classes) db.data.classes = [];
-    db.data.classes.push(newClass);
-    await db.write();
+    await Class.create(newClass);
 
     res.status(201).json(newClass);
 });
@@ -76,8 +70,7 @@ router.get('/:id/join', async (req, res) => {
     // In a real app, we'd check if req.user.email is in taggedStudents
     // For this MVP, we'll trust the frontend to show/hide, but here we could validate
     const { id } = req.params;
-    await db.read();
-    const cls = db.data.classes.find(c => c.id === id);
+    const cls = await Class.findOne({ id });
 
     if (!cls) return res.status(404).json({ message: 'Class not found' });
 
@@ -87,15 +80,11 @@ router.get('/:id/join', async (req, res) => {
 // Delete Class (Teacher only)
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    await db.read();
 
-    const classIndex = db.data.classes.findIndex(c => c.id === id);
-    if (classIndex === -1) {
+    const deletedClass = await Class.findOneAndDelete({ id });
+    if (!deletedClass) {
         return res.status(404).json({ message: 'Class not found' });
     }
-
-    db.data.classes.splice(classIndex, 1);
-    await db.write();
 
     res.json({ message: 'Class deleted successfully' });
 });

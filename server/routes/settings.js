@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import db from '../db.js';
+import Settings from '../models/Settings.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
         cb(null, join(__dirname, '../uploads/'));
     },
     filename: (req, file, cb) => {
-        const uniqueName = `qr-${Date.now()}${join('', file.originalname.substring(file.originalname.lastIndexOf('.')))}`
+        const uniqueName = `qr-${Date.now()}${join('', file.originalname.substring(file.originalname.lastIndexOf('.')))}`;
         cb(null, uniqueName);
     }
 });
@@ -35,8 +35,10 @@ const upload = multer({
 // Get current payment settings
 router.get('/', async (req, res) => {
     try {
-        await db.read();
-        const settings = db.data.settings || {};
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = await Settings.create({ qrCodeUrl: null });
+        }
         res.json(settings);
     } catch (error) {
         console.error('Error fetching settings:', error);
@@ -53,10 +55,13 @@ router.post('/qr-code', upload.single('qrCode'), async (req, res) => {
 
         const qrCodeUrl = `/uploads/${req.file.filename}`;
 
-        await db.read();
-        if (!db.data.settings) db.data.settings = {};
-        db.data.settings.qrCodeUrl = qrCodeUrl;
-        await db.write();
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = await Settings.create({ qrCodeUrl });
+        } else {
+            settings.qrCodeUrl = qrCodeUrl;
+            await settings.save();
+        }
 
         res.json({ message: 'QR code uploaded successfully', qrCodeUrl });
     } catch (error) {
@@ -68,23 +73,23 @@ router.post('/qr-code', upload.single('qrCode'), async (req, res) => {
 // Delete QR code
 router.delete('/qr-code', async (req, res) => {
     try {
-        await db.read();
+        const settings = await Settings.findOne();
 
-        if (!db.data.settings || !db.data.settings.qrCodeUrl) {
+        if (!settings || !settings.qrCodeUrl) {
             return res.status(404).json({ message: 'No QR code found' });
         }
 
         // Delete the file from disk
         const fs = await import('fs');
-        const filePath = join(__dirname, '..', db.data.settings.qrCodeUrl);
+        const filePath = join(__dirname, '..', settings.qrCodeUrl);
 
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
         }
 
         // Remove from database
-        db.data.settings.qrCodeUrl = null;
-        await db.write();
+        settings.qrCodeUrl = null;
+        await settings.save();
 
         res.json({ message: 'QR code deleted successfully' });
     } catch (error) {

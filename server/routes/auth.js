@@ -1,5 +1,5 @@
 import express from 'express';
-import db from '../db.js';
+import User from '../models/User.js';
 import { nanoid } from 'nanoid';
 
 const router = express.Router();
@@ -12,18 +12,18 @@ router.post('/signup', async (req, res) => {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
-    await db.read();
-    const userExists = db.data.users.find(u => u.email === email);
+    const userExists = await User.findOne({ email });
 
     if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
     }
 
     // First user is admin, second user is teacher, rest are students
+    const userCount = await User.countDocuments();
     let role = 'student';
-    if (db.data.users.length === 0) {
+    if (userCount === 0) {
         role = 'admin';
-    } else if (db.data.users.length === 1) {
+    } else if (userCount === 1) {
         role = 'teacher';
     }
 
@@ -38,8 +38,7 @@ router.post('/signup', async (req, res) => {
         createdAt: new Date().toISOString()
     };
 
-    db.data.users.push(newUser);
-    await db.write();
+    await User.create(newUser);
 
     res.status(201).json({ user: newUser, message: 'User created successfully' });
 });
@@ -48,8 +47,7 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    await db.read();
-    const user = db.data.users.find(u => u.email === email && u.password === password);
+    const user = await User.findOne({ email, password });
 
     if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
@@ -62,8 +60,7 @@ router.post('/login', async (req, res) => {
 router.post('/forgot-password/verify-email', async (req, res) => {
     const { email } = req.body;
 
-    await db.read();
-    const user = db.data.users.find(u => u.email === email);
+    const user = await User.findOne({ email });
 
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -76,8 +73,7 @@ router.post('/forgot-password/verify-email', async (req, res) => {
 router.post('/forgot-password/reset', async (req, res) => {
     const { email, securityAnswer, newPassword } = req.body;
 
-    await db.read();
-    const user = db.data.users.find(u => u.email === email);
+    const user = await User.findOne({ email });
 
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -88,7 +84,7 @@ router.post('/forgot-password/reset', async (req, res) => {
     }
 
     user.password = newPassword;
-    await db.write();
+    await user.save();
 
     res.json({ message: 'Password reset successful' });
 });

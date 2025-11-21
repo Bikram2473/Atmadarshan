@@ -1,5 +1,6 @@
 import express from 'express';
-import db from '../db.js';
+import Bug from '../models/Bug.js';
+import User from '../models/User.js';
 import { nanoid } from 'nanoid';
 
 const router = express.Router();
@@ -13,8 +14,7 @@ router.post('/report', async (req, res) => {
     }
 
     // Prevent admin from submitting bug reports
-    await db.read();
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
     if (user && user.role === 'admin') {
         return res.status(403).json({ message: 'Admins cannot submit bug reports' });
     }
@@ -33,9 +33,7 @@ router.post('/report', async (req, res) => {
         resolvedAt: null
     };
 
-    if (!db.data.bugReports) db.data.bugReports = [];
-    db.data.bugReports.push(bugReport);
-    await db.write();
+    await Bug.create(bugReport);
 
     res.status(201).json({ message: 'Bug report submitted successfully', bugReport });
 });
@@ -48,14 +46,13 @@ router.get('/reports', async (req, res) => {
         return res.status(400).json({ message: 'User ID is required' });
     }
 
-    await db.read();
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can view bug reports' });
     }
 
-    const bugReports = db.data.bugReports || [];
+    const bugReports = await Bug.find();
     res.json(bugReports);
 });
 
@@ -68,26 +65,25 @@ router.patch('/reports/:id/status', async (req, res) => {
         return res.status(400).json({ message: 'User ID and status are required' });
     }
 
-    await db.read();
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can update bug report status' });
     }
 
-    const reportIndex = db.data.bugReports?.findIndex(r => r.id === id);
-    if (reportIndex === -1 || reportIndex === undefined) {
+    const bugReport = await Bug.findOne({ id });
+    if (!bugReport) {
         return res.status(404).json({ message: 'Bug report not found' });
     }
 
-    db.data.bugReports[reportIndex].status = status;
+    bugReport.status = status;
     if (status === 'resolved') {
-        db.data.bugReports[reportIndex].resolvedAt = new Date().toISOString();
+        bugReport.resolvedAt = new Date().toISOString();
     }
 
-    await db.write();
+    await bugReport.save();
 
-    res.json({ message: 'Bug report status updated', bugReport: db.data.bugReports[reportIndex] });
+    res.json({ message: 'Bug report status updated', bugReport });
 });
 
 // Delete bug report (Admin only)
@@ -99,20 +95,16 @@ router.delete('/reports/:id', async (req, res) => {
         return res.status(400).json({ message: 'User ID is required' });
     }
 
-    await db.read();
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: 'Only admins can delete bug reports' });
     }
 
-    const reportIndex = db.data.bugReports?.findIndex(r => r.id === id);
-    if (reportIndex === -1 || reportIndex === undefined) {
+    const bugReport = await Bug.findOneAndDelete({ id });
+    if (!bugReport) {
         return res.status(404).json({ message: 'Bug report not found' });
     }
-
-    db.data.bugReports.splice(reportIndex, 1);
-    await db.write();
 
     res.json({ message: 'Bug report deleted successfully' });
 });

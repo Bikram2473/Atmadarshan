@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "id": "n0KFh2l0o8K1Nq2g36CSt",
+      "name": "Bikram Sutradhar",
+      "email": "b3sutradhar@gmail.com",
+      "password": "Rick@2473",
+      "role": "admin",
+      "createdAt": "2025-11-20T06:34:43.522Z"
+    }
+  ],
+  "circulars": [],
+  "chats": [
+    {
+      "id": "6JGpVg5a93kL8Do_6n_ts",
+      "name": "Hi",
+      "members": [
+        "n0KFh2l0o8K1Nq2g36CSt"
+      ],
+      "isGroup": true,
+      "createdAt": "2025-11-20T06:36:11.602Z"
+    }
+  ],
+  "classes": [],
+  "orders": [],
+  "messages": [
+    {
+      "roomId": "6JGpVg5a93kL8Do_6n_ts",
+      "senderId": "n0KFh2l0o8K1Nq2g36CSt",
+      "senderName": "Bikram Sutradhar",
+      "content": "Hi Rick",
+      "timestamp": "2025-11-20T06:59:41.155Z",
+      "id": "1763621981155"
+    }
+  ],
+  "settings": {
+    "qrCodeUrl": null
+  },
+  "bugReports": []
+}

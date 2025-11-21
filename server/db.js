@@ -1,15 +1,17 @@
-import { JSONFilePreset } from 'lowdb/node'
+import mongoose from 'mongoose';
 
-// Initialize the database with default data
-const defaultData = {
-    users: [],
-    circulars: [],
-    chats: [],
-    messages: [],
-    classes: [],
-    orders: []
-}
+// MongoDB connection function
+const connectDB = async () => {
+    try {
+        const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/atmadarshan';
 
-const db = await JSONFilePreset('db.json', defaultData)
+        await mongoose.connect(mongoURI);
 
-export default db
+        console.log('MongoDB connected successfully');
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    }
+};
+
+export default connectDB;

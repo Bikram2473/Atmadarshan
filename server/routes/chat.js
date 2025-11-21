@@ -1,5 +1,7 @@
 import express from 'express';
-import db from '../db.js';
+import User from '../models/User.js';
+import Chat from '../models/Chat.js';
+import Message from '../models/Message.js';
 import { nanoid } from 'nanoid';
 import multer from 'multer';
 import path from 'path';
@@ -48,8 +50,7 @@ const requireNonAdmin = async (req, res, next) => {
         return res.status(400).json({ message: 'User ID is required' });
     }
 
-    await db.read();
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -64,10 +65,7 @@ const requireNonAdmin = async (req, res, next) => {
 
 // Get all users (for 1-on-1 chat selection) - exclude admins
 router.get('/users', async (req, res) => {
-    await db.read();
-    const users = db.data.users
-        .filter(u => u.role !== 'admin') // Exclude admin users
-        .map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role }));
+    const users = await User.find({ role: { $ne: 'admin' } }).select('id name email role -_id');
     res.json(users);
 });
 
@@ -84,10 +82,7 @@ router.post('/groups', requireNonAdmin, async (req, res) => {
         createdAt: new Date().toISOString()
     };
 
-    await db.read();
-    if (!db.data.chats) db.data.chats = []; // Ensure chats array exists
-    db.data.chats.push(newGroup);
-    await db.write();
+    await Chat.create(newGroup);
 
     res.status(201).json(newGroup);
 });
@@ -97,18 +92,14 @@ router.delete('/groups/:groupId', async (req, res) => {
     const { groupId } = req.params;
     const { userId } = req.body;
 
-    await db.read();
+    const group = await Chat.findOne({ id: groupId, isGroup: true });
 
-    const groupIndex = db.data.chats.findIndex(c => c.id === groupId && c.isGroup);
-
-    if (groupIndex === -1) {
+    if (!group) {
         return res.status(404).json({ message: 'Group not found' });
     }
 
-    const group = db.data.chats[groupIndex];
-
     // Check if user is admin (cannot delete)
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
     if (user && user.role === 'admin') {
         return res.status(403).json({ message: 'Admins cannot delete groups' });
     }
@@ -118,9 +109,8 @@ router.delete('/groups/:groupId', async (req, res) => {
         return res.status(403).json({ message: 'Only the group creator can delete this group' });
     }
 
-    // Remove group from chats array
-    db.data.chats.splice(groupIndex, 1);
-    await db.write();
+    // Remove group
+    await Chat.deleteOne({ id: groupId });
 
     res.json({ message: 'Group deleted successfully', groupId });
 });
@@ -130,9 +120,7 @@ router.post('/groups/:groupId/leave', requireNonAdmin, async (req, res) => {
     const { groupId } = req.params;
     const { userId } = req.body;
 
-    await db.read();
-
-    const group = db.data.chats.find(c => c.id === groupId && c.isGroup);
+    const group = await Chat.findOne({ id: groupId, isGroup: true });
 
     if (!group) {
         return res.status(404).json({ message: 'Group not found' });
@@ -143,11 +131,10 @@ router.post('/groups/:groupId/leave', requireNonAdmin, async (req, res) => {
 
     // If no members left, delete the group
     if (group.members.length === 0) {
-        const groupIndex = db.data.chats.findIndex(c => c.id === groupId);
-        db.data.chats.splice(groupIndex, 1);
+        await Chat.deleteOne({ id: groupId });
+    } else {
+        await group.save();
     }
-
-    await db.write();
 
     res.json({ message: 'Left group successfully' });
 });
@@ -161,9 +148,7 @@ router.post('/groups/:groupId/add-members', requireNonAdmin, async (req, res) =>
         return res.status(400).json({ message: 'Please provide members to add' });
     }
 
-    await db.read();
-
-    const group = db.data.chats.find(c => c.id === groupId && c.isGroup);
+    const group = await Chat.findOne({ id: groupId, isGroup: true });
 
     if (!group) {
         return res.status(404).json({ message: 'Group not found' });
@@ -183,7 +168,7 @@ router.post('/groups/:groupId/add-members', requireNonAdmin, async (req, res) =>
 
     // Add new members
     group.members = [...group.members, ...membersToAdd];
-    await db.write();
+    await group.save();
 
     res.json({
         message: 'Members added successfully',
@@ -196,21 +181,17 @@ router.post('/groups/:groupId/add-members', requireNonAdmin, async (req, res) =>
 router.get('/groups/:groupId', async (req, res) => {
     const { groupId } = req.params;
 
-    await db.read();
-
-    const group = db.data.chats.find(c => c.id === groupId && c.isGroup);
+    const group = await Chat.findOne({ id: groupId, isGroup: true });
 
     if (!group) {
         return res.status(404).json({ message: 'Group not found' });
     }
 
     // Get full member details
-    const members = db.data.users
-        .filter(u => group.members.includes(u.id))
-        .map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role }));
+    const members = await User.find({ id: { $in: group.members } }).select('id name email role -_id');
 
     const groupWithMembers = {
-        ...group,
+        ...group.toObject(),
         memberDetails: members
     };
 
@@ -221,11 +202,9 @@ router.get('/groups/:groupId', async (req, res) => {
 router.post('/dm', requireNonAdmin, async (req, res) => {
     const { userId1, userId2 } = req.body;
 
-    await db.read();
-
     // Get both users
-    const user1 = db.data.users.find(u => u.id === userId1);
-    const user2 = db.data.users.find(u => u.id === userId2);
+    const user1 = await User.findOne({ id: userId1 });
+    const user2 = await User.findOne({ id: userId2 });
 
     if (!user1 || !user2) {
         return res.status(404).json({ message: 'User not found' });
@@ -244,11 +223,11 @@ router.post('/dm', requireNonAdmin, async (req, res) => {
     const roomId = `dm_${sortedIds[0]}_${sortedIds[1]}`;
 
     // Check if DM already exists
-    let dm = db.data.chats.find(c => c.id === roomId);
+    let dm = await Chat.findOne({ id: roomId });
 
     if (!dm) {
         // Get the other user's name for the DM
-        const otherUser = db.data.users.find(u => u.id === userId2);
+        const otherUser = await User.findOne({ id: userId2 });
 
         dm = {
             id: roomId,
@@ -258,9 +237,7 @@ router.post('/dm', requireNonAdmin, async (req, res) => {
             createdAt: new Date().toISOString()
         };
 
-        if (!db.data.chats) db.data.chats = [];
-        db.data.chats.push(dm);
-        await db.write();
+        await Chat.create(dm);
     }
 
     res.json(dm);
@@ -270,9 +247,7 @@ router.post('/dm', requireNonAdmin, async (req, res) => {
 router.get('/my-chats/:userId', async (req, res) => {
     const { userId } = req.params;
 
-    await db.read();
-
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
     const isAdmin = user && user.role === 'admin';
 
     // Completely block admin access
@@ -281,21 +256,21 @@ router.get('/my-chats/:userId', async (req, res) => {
     }
 
     // Regular users see only their chats
-    const groups = (db.data.chats || []).filter(c => c.isGroup && c.members.includes(userId));
-    const dms = (db.data.chats || []).filter(c => !c.isGroup && c.members.includes(userId));
+    const groups = await Chat.find({ isGroup: true, members: userId });
+    const dms = await Chat.find({ isGroup: false, members: userId });
 
     // For DMs, update the name to show the other participant's name
-    const dmsWithNames = dms.map(dm => {
+    const dmsWithNames = await Promise.all(dms.map(async dm => {
         const otherUserId = dm.members.find(id => id !== userId);
-        const otherUser = db.data.users.find(u => u.id === otherUserId);
+        const otherUser = await User.findOne({ id: otherUserId });
         return {
-            ...dm,
+            ...dm.toObject(),
             name: otherUser ? otherUser.name : 'Direct Message',
             otherUserId: otherUserId
         };
-    });
+    }));
 
-    const allChats = [...groups, ...dmsWithNames];
+    const allChats = [...groups.map(g => g.toObject()), ...dmsWithNames];
 
     res.json(allChats);
 });
@@ -304,9 +279,7 @@ router.get('/my-chats/:userId', async (req, res) => {
 router.get('/messages/:roomId/:userId', async (req, res) => {
     const { roomId, userId } = req.params;
 
-    await db.read();
-
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
     const isAdmin = user && user.role === 'admin';
 
     // Completely block admin access
@@ -315,7 +288,7 @@ router.get('/messages/:roomId/:userId', async (req, res) => {
     }
 
     // Check if user is a member of this chat
-    const chat = db.data.chats.find(c => c.id === roomId);
+    const chat = await Chat.findOne({ id: roomId });
 
     if (!chat) {
         return res.status(404).json({ message: 'Chat not found' });
@@ -325,7 +298,7 @@ router.get('/messages/:roomId/:userId', async (req, res) => {
         return res.status(403).json({ message: 'You do not have access to this chat' });
     }
 
-    const messages = (db.data.messages || []).filter(m => m.roomId === roomId);
+    const messages = await Message.find({ roomId });
     res.json(messages);
 });
 
@@ -334,9 +307,7 @@ router.delete('/messages/:messageId', async (req, res) => {
     const { messageId } = req.params;
     const { userId } = req.body;
 
-    await db.read();
-
-    const message = db.data.messages.find(m => m.id === messageId);
+    const message = await Message.findOne({ id: messageId });
 
     if (!message) {
         return res.status(404).json({ message: 'Message not found' });
@@ -353,7 +324,7 @@ router.delete('/messages/:messageId', async (req, res) => {
     message.fileUrl = null;
     message.fileName = null;
 
-    await db.write();
+    await message.save();
 
     res.json({ message: 'Message deleted successfully', messageId });
 });
@@ -362,41 +333,34 @@ router.delete('/messages/:messageId', async (req, res) => {
 router.post('/messages/forward', requireNonAdmin, async (req, res) => {
     const { messageId, targetChatIds, userId } = req.body;
 
-    await db.read();
-
-    const originalMessage = db.data.messages.find(m => m.id === messageId);
+    const originalMessage = await Message.findOne({ id: messageId });
 
     if (!originalMessage) {
         return res.status(404).json({ message: 'Message not found' });
     }
 
-    const user = db.data.users.find(u => u.id === userId);
+    const user = await User.findOne({ id: userId });
 
     if (!user) {
         return res.status(404).json({ message: 'User not found' });
     }
 
     // Create forwarded messages in each target chat
-    const forwardedMessages = targetChatIds.map(targetChatId => {
-        const forwardedMessage = {
-            id: nanoid(),
-            roomId: targetChatId,
-            senderId: userId,
-            senderName: user.name,
-            content: originalMessage.content,
-            messageType: originalMessage.messageType || 'text',
-            fileUrl: originalMessage.fileUrl || null,
-            fileName: originalMessage.fileName || null,
-            isDeleted: false,
-            isForwarded: true,
-            timestamp: new Date().toISOString()
-        };
+    const forwardedMessages = targetChatIds.map(targetChatId => ({
+        id: nanoid(),
+        roomId: targetChatId,
+        senderId: userId,
+        senderName: user.name,
+        content: originalMessage.content,
+        messageType: originalMessage.messageType || 'text',
+        fileUrl: originalMessage.fileUrl || null,
+        fileName: originalMessage.fileName || null,
+        isDeleted: false,
+        isForwarded: true,
+        timestamp: new Date().toISOString()
+    }));
 
-        db.data.messages.push(forwardedMessage);
-        return forwardedMessage;
-    });
-
-    await db.write();
+    await Message.insertMany(forwardedMessages);
 
     res.json({
         message: 'Message forwarded successfully',
@@ -408,18 +372,19 @@ router.post('/messages/forward', requireNonAdmin, async (req, res) => {
 router.get('/unread-count/:userId', async (req, res) => {
     const { userId } = req.params;
 
-    await db.read();
-
     // Get all chats where user is a member
-    const userChats = (db.data.chats || []).filter(c => c.members.includes(userId));
+    const userChats = await Chat.find({ members: userId });
     const userChatIds = userChats.map(c => c.id);
 
     // Count messages in these chats that are NOT read by the user
-    const unreadCount = (db.data.messages || []).filter(m =>
-        userChatIds.includes(m.roomId) &&
-        m.senderId !== userId && // Don't count own messages
-        (!m.readBy || !m.readBy.includes(userId))
-    ).length;
+    const unreadCount = await Message.countDocuments({
+        roomId: { $in: userChatIds },
+        senderId: { $ne: userId }, // Don't count own messages
+        $or: [
+            { readBy: { $exists: false } },
+            { readBy: { $not: { $elemMatch: { $eq: userId } } } }
+        ]
+    });
 
     res.json({ unreadCount });
 });
@@ -429,22 +394,16 @@ router.post('/mark-read/:roomId', async (req, res) => {
     const { roomId } = req.params;
     const { userId } = req.body;
 
-    await db.read();
-
-    let updated = false;
-    (db.data.messages || []).forEach(m => {
-        if (m.roomId === roomId && m.senderId !== userId) {
-            if (!m.readBy) m.readBy = [];
-            if (!m.readBy.includes(userId)) {
-                m.readBy.push(userId);
-                updated = true;
-            }
+    await Message.updateMany(
+        {
+            roomId,
+            senderId: { $ne: userId },
+            readBy: { $ne: userId }
+        },
+        {
+            $addToSet: { readBy: userId }
         }
-    });
-
-    if (updated) {
-        await db.write();
-    }
+    );
 
     res.json({ success: true });
 });

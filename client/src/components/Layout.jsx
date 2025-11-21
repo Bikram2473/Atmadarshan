@@ -46,7 +46,14 @@ export default function Layout() {
 
         fetchUnreadCount();
 
-        const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000');
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const newSocket = io(apiUrl, {
+            transports: ['websocket', 'polling'],
+            path: '/socket.io',
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 5
+        });
         setSocket(newSocket);
 
         newSocket.on('connect', () => {

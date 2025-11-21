@@ -16,7 +16,8 @@ const storage = multer.diskStorage({
         cb(null, join(__dirname, '../uploads/'));
     },
     filename: (req, file, cb) => {
-        const uniqueName = `profile-${Date.now()}-${Math.round(Math.random() * 1E9)}${join('', file.originalname.substring(file.originalname.lastIndexOf('.')))}`;
+        const ext = file.originalname.substring(file.originalname.lastIndexOf('.'));
+        const uniqueName = `profile-${Date.now()}-${Math.round(Math.random() * 1E9)}${ext}`;
         cb(null, uniqueName);
     }
 });
@@ -35,92 +36,145 @@ const upload = multer({
 
 // Signup
 router.post('/signup', async (req, res) => {
-    const { name, email, password, securityQuestion, securityAnswer } = req.body;
+    try {
+        console.log('Signup request received:', { email: req.body.email, name: req.body.name });
 
-    if (!name || !email || !password || !securityQuestion || !securityAnswer) {
-        return res.status(400).json({ message: 'All fields are required' });
+        const { name, email, password, securityQuestion, securityAnswer } = req.body;
+
+        if (!name || !email || !password || !securityQuestion || !securityAnswer) {
+            console.log('Signup failed: Missing fields');
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const userExists = await User.findOne({ email });
+        console.log('User exists check:', userExists ? 'Yes' : 'No');
+
+        if (userExists) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // First user is admin, second user is teacher, rest are students
+        const userCount = await User.countDocuments();
+        console.log('Current user count:', userCount);
+
+        let role = 'student';
+        if (userCount === 0) {
+            role = 'admin';
+        } else if (userCount === 1) {
+            role = 'teacher';
+        }
+
+        const newUser = {
+            id: nanoid(),
+            name,
+            email,
+            password, // In a real app, hash this!
+            role,
+            securityQuestion,
+            securityAnswer,
+            createdAt: new Date().toISOString()
+        };
+
+        console.log('Creating new user with role:', role);
+        const createdUser = await User.create(newUser);
+        console.log('User created successfully:', createdUser.id);
+
+        res.status(201).json({
+            user: {
+                id: createdUser.id,
+                name: createdUser.name,
+                email: createdUser.email,
+                role: createdUser.role
+            }
+        });
+    } catch (error) {
+        console.error('Signup error:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: 'Server error during signup', error: error.message });
     }
-
-    const userExists = await User.findOne({ email });
-
-    if (userExists) {
-        return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // First user is admin, second user is teacher, rest are students
-    const userCount = await User.countDocuments();
-    let role = 'student';
-    if (userCount === 0) {
-        role = 'admin';
-    } else if (userCount === 1) {
-        role = 'teacher';
-    }
-
-    const newUser = {
-        id: nanoid(),
-        name,
-        email,
-        password, // In a real app, hash this!
-        role,
-        securityQuestion,
-        securityAnswer,
-        createdAt: new Date().toISOString()
-    };
-
-    await User.create(newUser);
-
-    res.status(201).json({ user: newUser, message: 'User created successfully' });
 });
 
 // Login
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    try {
+        console.log('Login request received:', { email: req.body.email });
 
-    const user = await User.findOne({ email, password });
+        const { email, password } = req.body;
 
-    if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const user = await User.findOne({ email });
+        console.log('User found:', user ? 'Yes' : 'No');
+
+        if (!user || user.password !== password) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        console.log('Login successful for user:', user.id);
+        res.json({
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profileImage: user.profileImage
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: 'Server error during login', error: error.message });
     }
-
-    res.json({ user, message: 'Login successful' });
 });
 
 // Password Reset - Step 1: Verify email and get security question
 router.post('/forgot-password/verify-email', async (req, res) => {
-    const { email } = req.body;
+    try {
+        const { email } = req.body;
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ securityQuestion: user.securityQuestion });
+    } catch (error) {
+        console.error('Verify email error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-    res.json({ securityQuestion: user.securityQuestion });
 });
 
 // Password Reset - Step 2: Verify answer and reset password
 router.post('/forgot-password/reset', async (req, res) => {
-    const { email, securityAnswer, newPassword } = req.body;
+    try {
+        const { email, securityAnswer, newPassword } = req.body;
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.securityAnswer !== securityAnswer) {
+            return res.status(401).json({ message: 'Incorrect security answer' });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password reset successful' });
+    } catch (error) {
+        console.error('Password reset error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-    if (user.securityAnswer !== securityAnswer) {
-        return res.status(401).json({ message: 'Incorrect security answer' });
-    }
-
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ message: 'Password reset successful' });
 });
 
 // Upload Profile Image
 router.post('/profile-image', upload.single('profileImage'), async (req, res) => {
-    const userId = req.headers['user-id']; // Expect user-id in header
+    const userId = req.headers['user-id'];
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     if (!req.file) {

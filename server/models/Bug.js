@@ -6,6 +6,18 @@ const bugSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    userId: {
+        type: String,
+        required: true
+    },
+    userName: {
+        type: String,
+        required: true
+    },
+    userRole: {
+        type: String,
+        required: true
+    },
     title: {
         type: String,
         required: true
@@ -14,17 +26,13 @@ const bugSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    reportedBy: {
+    category: {
         type: String,
-        required: true
+        default: 'general'
     },
-    reporterName: {
+    priority: {
         type: String,
-        required: true
-    },
-    reporterRole: {
-        type: String,
-        required: true
+        default: 'medium'
     },
     status: {
         type: String,
@@ -34,6 +42,10 @@ const bugSchema = new mongoose.Schema({
     createdAt: {
         type: String,
         required: true
+    },
+    resolvedAt: {
+        type: String,
+        default: null
     }
 });
 

@@ -6,7 +6,7 @@ import { User, Bell, Shield, QrCode, Upload, CheckCircle, AlertCircle, Trash2 } 
 import { motion } from 'framer-motion';
 
 export default function Settings() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
 
     const [notifications, setNotifications] = useState(true);
     const [qrCodeFile, setQrCodeFile] = useState(null);
@@ -15,6 +15,11 @@ export default function Settings() {
     const [uploading, setUploading] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+
+    // Profile Image State
+    const [profileImageFile, setProfileImageFile] = useState(null);
+    const [profileImagePreview, setProfileImagePreview] = useState(null);
+    const [uploadingProfile, setUploadingProfile] = useState(false);
 
     useEffect(() => {
         if (user?.role === 'teacher') {
@@ -108,6 +113,89 @@ export default function Settings() {
         }
     };
 
+    const handleProfileImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                setMessage({ type: 'error', text: 'Please upload an image file' });
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                setMessage({ type: 'error', text: 'File size should be less than 5MB' });
+                return;
+            }
+            setProfileImageFile(file);
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfileImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleProfileImageUpload = async () => {
+        if (!profileImageFile) return;
+
+        setUploadingProfile(true);
+        const formData = new FormData();
+        formData.append('profileImage', profileImageFile);
+
+        try {
+            const response = await api.post('/api/auth/profile-image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'user-id': user.id
+                },
+            });
+
+            setMessage({ type: 'success', text: 'Profile photo updated!' });
+            setProfileImageFile(null);
+            setProfileImagePreview(null);
+
+            // Update auth context with new user data
+            if (response.data.user) {
+                updateUser(response.data.user);
+            }
+        } catch (error) {
+            console.error('Profile upload error:', error);
+            setMessage({ type: 'error', text: 'Failed to update profile photo.' });
+        } finally {
+            setUploadingProfile(false);
+        }
+    };
+
+    const handleProfileImageRemove = async () => {
+        if (!confirm('Are you sure you want to remove your profile photo?')) {
+            return;
+        }
+
+        setUploadingProfile(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            const response = await api.delete('/api/auth/profile-image', {
+                headers: {
+                    'user-id': user.id
+                }
+            });
+
+            setMessage({ type: 'success', text: 'Profile photo removed!' });
+            setProfileImageFile(null);
+            setProfileImagePreview(null);
+
+            // Update auth context with new user data
+            if (response.data.user) {
+                updateUser(response.data.user);
+            }
+        } catch (error) {
+            console.error('Profile remove error:', error);
+            setMessage({ type: 'error', text: 'Failed to remove profile photo.' });
+        } finally {
+            setUploadingProfile(false);
+        }
+    };
+
     return (
         <div className="p-6 max-w-4xl mx-auto space-y-8">
             <h1 className="text-3xl font-heading font-bold text-primary-900">Settings</h1>
@@ -128,6 +216,41 @@ export default function Settings() {
                             <p className="text-sm text-secondary-500">Manage your personal information</p>
                         </div>
                     </div>
+
+                    <div className="flex flex-col items-center mb-8">
+                        <div className="relative group">
+                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100">
+                                <img
+                                    src={profileImagePreview || (user?.profileImage ? `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.profileImage}` : `https://ui-avatars.com/api/?name=${user?.name}&background=random&size=128`)}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <label className="absolute bottom-0 right-0 bg-primary-600 text-white p-2.5 rounded-full cursor-pointer hover:bg-primary-700 shadow-md transition-all transform hover:scale-110">
+                                <Upload size={18} />
+                                <input type="file" accept="image/*" onChange={handleProfileImageChange} className="hidden" />
+                            </label>
+                        </div>
+                        {profileImageFile && (
+                            <button
+                                onClick={handleProfileImageUpload}
+                                disabled={uploadingProfile}
+                                className="mt-4 text-sm bg-primary-600 text-white px-4 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
+                            >
+                                {uploadingProfile ? 'Saving...' : 'Save New Photo'}
+                            </button>
+                        )}
+                        {!profileImageFile && user?.profileImage && (
+                            <button
+                                onClick={handleProfileImageRemove}
+                                disabled={uploadingProfile}
+                                className="mt-4 text-sm bg-red-600 text-white px-4 py-2 rounded-full font-medium hover:bg-red-700 transition-colors shadow-sm disabled:opacity-50"
+                            >
+                                {uploadingProfile ? 'Removing...' : 'Remove Photo'}
+                            </button>
+                        )}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label className="block text-sm font-bold text-secondary-700 mb-2">Full Name</label>

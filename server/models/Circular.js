@@ -10,24 +10,29 @@ const circularSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
+    content: {
         type: String,
         required: true
     },
-    teacherId: {
+    authorName: {
         type: String,
         required: true
     },
-    files: {
-        type: [String],
-        default: []
+    fileUrl: {
+        type: String,
+        default: null
+    },
+    fileName: {
+        type: String,
+        default: null
+    },
+    fileType: {
+        type: String,
+        default: null
     },
     createdAt: {
         type: String,
         required: true
-    },
-    updatedAt: {
-        type: String
     }
 });
 

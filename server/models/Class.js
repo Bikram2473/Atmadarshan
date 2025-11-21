@@ -10,7 +10,7 @@ const classSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
+    link: {
         type: String,
         required: true
     },
@@ -22,15 +22,15 @@ const classSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    meetingLink: {
-        type: String,
-        required: true
-    },
     taggedStudents: {
         type: [String],
         default: []
     },
-    createdBy: {
+    teacherId: {
+        type: String,
+        required: true
+    },
+    teacherName: {
         type: String,
         required: true
     },

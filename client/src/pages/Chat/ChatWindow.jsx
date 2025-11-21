@@ -25,18 +25,51 @@ export default function ChatWindow() {
     // Initialize Socket.io
     useEffect(() => {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        console.log('Initializing socket connection to:', apiUrl);
+
         const newSocket = io(apiUrl, {
-            transports: ['websocket'], // Force websocket only
+            transports: ['websocket', 'polling'],
             path: '/socket.io',
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 5,
             withCredentials: true
         });
+
+        newSocket.on('connect', () => {
+            console.log('Socket connected:', newSocket.id);
+        });
+
+        newSocket.on('connect_error', (err) => {
+            console.error('Socket connection error:', err);
+        });
+
         setSocket(newSocket);
 
         return () => newSocket.close();
     }, []);
+
+    // Register user with socket
+    useEffect(() => {
+        if (socket && user?.id) {
+            const registerUser = () => {
+                if (socket.connected) {
+                    console.log('Registering user with socket:', user.id);
+                    socket.emit('register_user', user.id);
+                }
+            };
+
+            // Try to register immediately
+            registerUser();
+
+            // Also register on any reconnect
+            socket.on('connect', registerUser);
+
+            return () => {
+                socket.off('connect', registerUser);
+            };
+        }
+    }, [socket, user]);
 
     // Fetch Chats
     const fetchMyChats = async () => {

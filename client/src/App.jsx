@@ -4,7 +4,7 @@ import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Home from './pages/Dashboard/Home';
-import ChatWindow from './pages/Chat/ChatWindow';
+
 import Classes from './pages/Classes/Classes';
 import Payments from './pages/Payments/Payments';
 import Settings from './pages/Settings/Settings';
@@ -51,11 +51,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<Home />} />
-            <Route path="chat" element={
-              <AdminBlockedRoute>
-                <ChatWindow />
-              </AdminBlockedRoute>
-            } />
+
             <Route path="classes" element={<Classes />} />
             <Route path="payments" element={<Payments />} />
             <Route path="settings" element={<Settings />} />

@@ -34,8 +34,15 @@ router.get('/', async (req, res) => {
 
 // Get all students (for tagging)
 router.get('/students', async (req, res) => {
-    const students = await User.find({ role: 'student' }).select('id name email -_id');
-    res.json(students);
+    try {
+        const students = await User.find({ role: 'student' }).select('id name email -_id');
+        console.log('Students found:', students.length);
+        console.log('Student data:', students);
+        res.json(students);
+    } catch (error) {
+        console.error('Error fetching students:', error);
+        res.status(500).json({ message: 'Failed to fetch students', error: error.message });
+    }
 });
 
 // Create Class (Teacher only)

@@ -45,7 +45,9 @@ export default function Classes() {
         if (user && user.role === 'teacher') {
             const fetchStudents = async () => {
                 try {
+                    console.log('Fetching students for autocomplete...');
                     const response = await api.get('/api/classes/students');
+                    console.log('Students received:', response.data);
                     setStudents(response.data);
                 } catch (error) {
                     console.error('Error fetching students:', error);

@@ -26,11 +26,12 @@ export default function ChatWindow() {
     useEffect(() => {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const newSocket = io(apiUrl, {
-            transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+            transports: ['websocket'], // Force websocket only
             path: '/socket.io',
             reconnection: true,
             reconnectionDelay: 1000,
-            reconnectionAttempts: 5
+            reconnectionAttempts: 5,
+            withCredentials: true
         });
         setSocket(newSocket);
 

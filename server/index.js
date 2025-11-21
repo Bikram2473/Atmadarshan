@@ -21,8 +21,13 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_URL || '*',
-        methods: ["GET", "POST"]
+        origin: [
+            process.env.CLIENT_URL,
+            "https://atmadarshan-frontend-ffhg.onrender.com",
+            "http://localhost:5173"
+        ],
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 

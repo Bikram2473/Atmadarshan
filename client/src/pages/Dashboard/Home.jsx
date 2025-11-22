@@ -137,7 +137,7 @@ export default function Home() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden"
+                className="bg-gradient-to-r from-green-600 to-green-800 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden"
             >
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-64 h-64 bg-accent-500/20 rounded-full blur-3xl"></div>
@@ -147,8 +147,8 @@ export default function Home() {
                         <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">
                             Namaste, {user?.name}!
                         </h1>
-                        <p className="text-primary-100 text-lg max-w-2xl">
-                            Welcome to your personal sanctuary. You are logged in as a <span className="font-semibold capitalize text-accent-300">{user?.role}</span>.
+                        <p className="text-green-100 text-lg max-w-2xl">
+                            Welcome to your personal sanctuary. You are logged in as a <span className="font-semibold capitalize text-yellow-300">{user?.role}</span>.
                         </p>
                     </div>
 

@@ -47,7 +47,7 @@ export default function Layout() {
         <div className="min-h-screen bg-secondary-50 flex font-sans">
             {/* Sidebar */}
             <aside className={clsx(
-                "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-secondary-200 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 shadow-xl md:shadow-none",
+                "fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-800 border-r border-secondary-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 shadow-xl md:shadow-none",
                 isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 <div className="h-full flex flex-col">
@@ -73,8 +73,8 @@ export default function Layout() {
                                     className={clsx(
                                         "flex items-center px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 group relative overflow-hidden",
                                         isActive
-                                            ? "bg-primary-50 text-primary-700 shadow-sm"
-                                            : "text-secondary-600 hover:bg-secondary-50 hover:text-primary-600"
+                                            ? "bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400 shadow-sm"
+                                            : "text-secondary-600 dark:text-slate-300 hover:bg-secondary-50 dark:hover:bg-slate-700/50 hover:text-primary-600 dark:hover:text-primary-400"
                                     )}
                                 >
                                     {isActive && (
@@ -97,7 +97,7 @@ export default function Layout() {
                         })}
                     </nav>
 
-                    <div className="p-6 border-t border-secondary-100 bg-secondary-50/50">
+                    <div className="p-6 border-t border-secondary-100 dark:border-slate-700 bg-secondary-50/50 dark:bg-slate-800/50">
                         <div className="flex items-center mb-6 px-2">
                             {user?.profileImage ? (
                                 <img
@@ -106,13 +106,13 @@ export default function Layout() {
                                     className="w-10 h-10 rounded-full object-cover shadow-sm border border-primary-100"
                                 />
                             ) : (
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold shadow-sm border border-primary-100">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-800 dark:to-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-200 font-bold shadow-sm border border-primary-100">
                                     {user?.name?.[0]?.toUpperCase()}
                                 </div>
                             )}
                             <div className="ml-3 overflow-hidden">
-                                <p className="text-sm font-semibold text-gray-800 truncate">{user?.name}</p>
-                                <p className="text-xs text-primary-600 font-medium capitalize">{user?.role}</p>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">{user?.name}</p>
+                                <p className="text-xs text-primary-600 dark:text-primary-400 font-medium capitalize">{user?.role}</p>
                             </div>
                         </div>
                         <button

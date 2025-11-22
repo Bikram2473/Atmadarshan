@@ -115,7 +115,7 @@ export default function Home() {
 
     const getBugStatusColor = (status) => {
         switch (status) {
-            case 'open': return 'bg-red-100 text-red-700';
+            case 'open': return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
             case 'in-progress': return 'bg-yellow-100 text-yellow-700';
             case 'resolved': return 'bg-green-100 text-green-700';
             default: return 'bg-gray-100 text-gray-700';
@@ -124,7 +124,7 @@ export default function Home() {
 
     const getPriorityColor = (priority) => {
         switch (priority) {
-            case 'high': return 'text-red-600';
+            case 'high': return 'text-red-600 dark:text-red-400';
             case 'medium': return 'text-yellow-600';
             case 'low': return 'text-green-600';
             default: return 'text-gray-600';
@@ -170,20 +170,20 @@ export default function Home() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl shadow-sm border border-secondary-200 p-6"
+                    className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-secondary-200 dark:border-slate-700 p-6"
                 >
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-red-100 rounded-lg">
-                                <Bug className="text-red-600" size={24} />
+                            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                                <Bug className="text-red-600 dark:text-red-400" size={24} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-heading font-bold text-primary-900">Bug Reports</h2>
-                                <p className="text-sm text-secondary-600">Issues reported by users</p>
+                                <h2 className="text-xl font-heading font-bold text-primary-900 dark:text-white">Bug Reports</h2>
+                                <p className="text-sm text-secondary-600 dark:text-slate-400">Issues reported by users</p>
                             </div>
                         </div>
                         {bugReports.length > 0 && (
-                            <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                            <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-bold">
                                 {bugReports.filter(b => b.status === 'open').length} Open
                             </span>
                         )}
@@ -194,10 +194,10 @@ export default function Home() {
                             <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full"></div>
                         </div>
                     ) : bugReports.length === 0 ? (
-                        <div className="text-center py-12 bg-secondary-50 rounded-xl">
+                        <div className="text-center py-12 bg-secondary-50 dark:bg-slate-700 rounded-xl">
                             <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                            <p className="text-secondary-600 font-medium">No bug reports</p>
-                            <p className="text-xs text-secondary-400 mt-1">All systems running smoothly!</p>
+                            <p className="text-secondary-600 dark:text-slate-400 font-medium">No bug reports</p>
+                            <p className="text-xs text-secondary-400 dark:text-slate-500 mt-1">All systems running smoothly!</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -260,10 +260,10 @@ export default function Home() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white rounded-2xl shadow-sm border border-secondary-200 p-6"
+                        className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-secondary-200 dark:border-slate-700 p-6"
                     >
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-heading font-bold text-primary-900">Upcoming Classes</h2>
+                            <h2 className="text-xl font-heading font-bold text-primary-900 dark:text-white">Upcoming Classes</h2>
                             <Calendar className="text-primary-500" size={20} />
                         </div>
 
@@ -272,19 +272,19 @@ export default function Home() {
                                 <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full"></div>
                             </div>
                         ) : upcomingClasses.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-secondary-50 rounded-xl border border-dashed border-secondary-300">
-                                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                                    <Clock className="text-secondary-400" size={24} />
+                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-secondary-50 dark:bg-slate-700 rounded-xl border border-dashed border-secondary-300 dark:border-slate-600">
+                                <div className="w-12 h-12 bg-white dark:bg-slate-600 rounded-full flex items-center justify-center shadow-sm">
+                                    <Clock className="text-secondary-400 dark:text-slate-300" size={24} />
                                 </div>
                                 <div>
-                                    <p className="text-secondary-600 font-medium">No classes scheduled</p>
-                                    <p className="text-xs text-secondary-400 mt-1">Check back later for updates</p>
+                                    <p className="text-secondary-600 dark:text-slate-400 font-medium">No classes scheduled</p>
+                                    <p className="text-xs text-secondary-400 dark:text-slate-500 mt-1">Check back later for updates</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="space-y-3">
                                 {upcomingClasses.map((cls) => (
-                                    <div key={cls.id} className="p-4 bg-secondary-50 rounded-xl hover:bg-primary-50 transition-colors border border-secondary-200 hover:border-primary-300">
+                                    <div key={cls.id} className="p-4 bg-secondary-50 dark:bg-slate-700 rounded-xl hover:bg-primary-50 transition-colors border border-secondary-200 hover:border-primary-300">
                                         <div className="flex items-start gap-3">
                                             <div className="p-2 bg-primary-100 rounded-lg">
                                                 <Video className="text-primary-600" size={18} />
@@ -321,22 +321,22 @@ export default function Home() {
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8"
+                            className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl p-8"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-100 rounded-lg">
-                                        <Bug className="text-red-600" size={24} />
+                                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                                        <Bug className="text-red-600 dark:text-red-400" size={24} />
                                     </div>
                                     <div>
-                                        <h2 className="text-2xl font-heading font-bold text-primary-900">Report a Bug</h2>
-                                        <p className="text-sm text-secondary-600">Help us improve by reporting issues</p>
+                                        <h2 className="text-2xl font-heading font-bold text-primary-900 dark:text-white">Report a Bug</h2>
+                                        <p className="text-sm text-secondary-600 dark:text-slate-400">Help us improve by reporting issues</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setShowBugModal(false)}
-                                    className="p-2 hover:bg-secondary-100 rounded-lg transition-colors"
+                                    className="p-2 hover:bg-secondary-100 dark:hover:bg-slate-700 rounded-lg dark:text-white transition-colors"
                                 >
                                     <X size={24} />
                                 </button>
@@ -344,36 +344,36 @@ export default function Home() {
 
                             <form onSubmit={handleSubmitBug} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-bold text-secondary-700 mb-2">Bug Title *</label>
+                                    <label className="block text-sm font-bold text-secondary-700 dark:text-slate-300 mb-2">Bug Title *</label>
                                     <input
                                         type="text"
                                         required
                                         value={bugForm.title}
                                         onChange={(e) => setBugForm({ ...bugForm, title: e.target.value })}
-                                        className="w-full px-4 py-3 rounded-xl border border-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50"
+                                        className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50 dark:bg-slate-700 dark:text-white"
                                         placeholder="Brief description of the issue"
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-bold text-secondary-700 mb-2">Description *</label>
+                                    <label className="block text-sm font-bold text-secondary-700 dark:text-slate-300 mb-2">Description *</label>
                                     <textarea
                                         required
                                         value={bugForm.description}
                                         onChange={(e) => setBugForm({ ...bugForm, description: e.target.value })}
                                         rows={4}
-                                        className="w-full px-4 py-3 rounded-xl border border-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50"
+                                        className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50 dark:bg-slate-700 dark:text-white"
                                         placeholder="Detailed explanation of what went wrong..."
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-bold text-secondary-700 mb-2">Category</label>
+                                        <label className="block text-sm font-bold text-secondary-700 dark:text-slate-300 mb-2">Category</label>
                                         <select
                                             value={bugForm.category}
                                             onChange={(e) => setBugForm({ ...bugForm, category: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl border border-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50"
+                                            className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50 dark:bg-slate-700 dark:text-white"
                                         >
                                             <option value="general">General</option>
                                             <option value="classes">Classes</option>
@@ -385,11 +385,11 @@ export default function Home() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-bold text-secondary-700 mb-2">Priority</label>
+                                        <label className="block text-sm font-bold text-secondary-700 dark:text-slate-300 mb-2">Priority</label>
                                         <select
                                             value={bugForm.priority}
                                             onChange={(e) => setBugForm({ ...bugForm, priority: e.target.value })}
-                                            className="w-full px-4 py-3 rounded-xl border border-secondary-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50"
+                                            className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-secondary-50 dark:bg-slate-700 dark:text-white"
                                         >
                                             <option value="low">Low</option>
                                             <option value="medium">Medium</option>

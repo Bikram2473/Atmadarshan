@@ -311,9 +311,9 @@ export default function Signup() {
                                     value={securityQuestion}
                                     onChange={(e) => setSecurityQuestion(e.target.value)}
                                 >
-                                    <option value="" className="bg-primary-900">Select a security question</option>
+                                    <option value="" className="bg-slate-800 text-white">Select a security question</option>
                                     {securityQuestions.map((q, idx) => (
-                                        <option key={idx} value={q} className="bg-primary-900">{q}</option>
+                                        <option key={idx} value={q} className="bg-slate-800 text-white">{q}</option>
                                     ))}
                                 </select>
                             </div>

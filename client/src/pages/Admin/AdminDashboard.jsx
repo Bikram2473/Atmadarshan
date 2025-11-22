@@ -99,70 +99,102 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="p-6 md:p-8">
-            <div className="mb-8">
-                <div className="flex items-center mb-2">
-                    <Shield className="w-8 h-8 text-primary-600 mr-3" />
-                    <h1 className="text-3xl font-heading font-bold text-gray-900">User Management</h1>
+        <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-700">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-heading font-bold text-white flex items-center gap-3">
+                        <div className="p-2 bg-slate-700 rounded-lg text-primary-400">
+                            <Shield size={28} />
+                        </div>
+                        Admin Dashboard
+                    </h1>
+                    <p className="text-slate-400 mt-2 ml-1">
+                        Manage users, roles, and system settings
+                    </p>
                 </div>
-                <p className="text-secondary-600 ml-11">
-                    Manage all registered users in the application
-                </p>
+                <div className="flex gap-3">
+                    <div className="px-4 py-2 bg-slate-900 rounded-xl border border-slate-700 flex flex-col items-end">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Users</span>
+                        <span className="text-xl font-heading font-bold text-white">{users.length}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-700 flex items-center justify-between group hover:border-primary-500/30 transition-all">
+                    <div>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Administrators</p>
+                        <p className="text-3xl font-heading font-bold text-white mt-2 group-hover:text-primary-400 transition-colors">
+                            {users.filter(u => u.role === 'admin').length}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-purple-900/20 text-purple-400 rounded-xl group-hover:bg-purple-900/30 transition-colors">
+                        <Shield size={24} />
+                    </div>
+                </div>
+
+                <div className="bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-700 flex items-center justify-between group hover:border-primary-500/30 transition-all">
+                    <div>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Teachers</p>
+                        <p className="text-3xl font-heading font-bold text-white mt-2 group-hover:text-primary-400 transition-colors">
+                            {users.filter(u => u.role === 'teacher').length}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-blue-900/20 text-blue-400 rounded-xl group-hover:bg-blue-900/30 transition-colors">
+                        <UserCheck size={24} />
+                    </div>
+                </div>
+
+                <div className="bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-700 flex items-center justify-between group hover:border-primary-500/30 transition-all">
+                    <div>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wide">Students</p>
+                        <p className="text-3xl font-heading font-bold text-white mt-2 group-hover:text-primary-400 transition-colors">
+                            {users.filter(u => u.role === 'student').length}
+                        </p>
+                    </div>
+                    <div className="p-4 bg-green-900/20 text-green-400 rounded-xl group-hover:bg-green-900/30 transition-colors">
+                        <GraduationCap size={24} />
+                    </div>
+                </div>
             </div>
 
             {error && (
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start"
+                    className="p-4 bg-red-900/20 border border-red-900/30 rounded-xl flex items-start gap-3"
                 >
-                    <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
                     <div>
-                        <h3 className="text-sm font-semibold text-red-800">Error</h3>
-                        <p className="text-sm text-red-600 mt-1">{error}</p>
+                        <h3 className="text-sm font-bold text-red-400">Error</h3>
+                        <p className="text-sm text-red-300 mt-1">{error}</p>
                     </div>
                 </motion.div>
             )}
 
-            <div className="bg-white rounded-2xl shadow-sm border border-secondary-200 overflow-hidden">
-                <div className="p-6 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <Users className="w-6 h-6 text-primary-700 mr-3" />
-                            <h2 className="text-xl font-heading font-bold text-primary-900">
-                                Registered Users
-                            </h2>
-                        </div>
-                        <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-primary-200">
-                            <span className="text-sm font-semibold text-primary-700">
-                                Total: {users.length}
-                            </span>
-                        </div>
-                    </div>
+            {/* Users Table */}
+            <div className="bg-slate-800 rounded-2xl shadow-sm border border-slate-700 overflow-hidden">
+                <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                    <h2 className="text-xl font-heading font-bold text-white flex items-center gap-2">
+                        <Users className="text-primary-400" size={24} />
+                        Registered Users
+                    </h2>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-secondary-50 border-b border-secondary-200">
+                        <thead className="bg-slate-900/50 border-b border-slate-700">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
-                                    User
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
-                                    Email
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
-                                    Role
-                                </th>
-                                <th className="px-6 py-4 text-left text-xs font-bold text-secondary-700 uppercase tracking-wider">
-                                    Joined
-                                </th>
-                                <th className="px-6 py-4 text-right text-xs font-bold text-secondary-700 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Joined</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-secondary-100">
+                        <tbody className="divide-y divide-slate-700/50">
                             <AnimatePresence>
                                 {users.map((userData) => (
                                     <motion.tr
@@ -170,38 +202,37 @@ export default function AdminDashboard() {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        className="hover:bg-secondary-50 transition-colors"
+                                        className="hover:bg-slate-700/30 transition-colors group"
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-700 font-bold shadow-sm border border-primary-100">
+                                                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-primary-400 font-bold text-sm shadow-sm border border-slate-600 group-hover:bg-slate-600 transition-colors">
                                                     {userData.name[0].toUpperCase()}
                                                 </div>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-semibold text-gray-900">
-                                                        {userData.name}
-                                                    </div>
+                                                    <div className="text-sm font-bold text-white">{userData.name}</div>
                                                     {userData.id === user?.id && (
-                                                        <span className="text-xs text-primary-600 font-medium">
-                                                            (You)
+                                                        <span className="text-[10px] font-bold text-primary-400 bg-primary-900/20 px-2 py-0.5 rounded-full border border-primary-900/30">
+                                                            YOU
                                                         </span>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-secondary-700">
-                                                {userData.email}
-                                            </div>
+                                            <div className="text-sm text-slate-400 font-medium">{userData.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold border ${getRoleBadgeColor(userData.role)}`}>
+                                            <div className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border shadow-sm ${userData.role === 'admin' ? 'bg-purple-900/20 text-purple-400 border-purple-900/30' :
+                                                    userData.role === 'teacher' ? 'bg-blue-900/20 text-blue-400 border-blue-900/30' :
+                                                        'bg-green-900/20 text-green-400 border-green-900/30'
+                                                }`}>
                                                 {getRoleIcon(userData.role)}
-                                                <span className="ml-1.5 capitalize">{userData.role}</span>
+                                                <span className="ml-2 capitalize">{userData.role}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-secondary-600">
+                                            <div className="text-sm text-slate-500">
                                                 {new Date(userData.createdAt).toLocaleDateString('en-US', {
                                                     year: 'numeric',
                                                     month: 'short',
@@ -214,10 +245,10 @@ export default function AdminDashboard() {
                                                 <button
                                                     onClick={() => handleDeleteUser(userData.id, userData.name)}
                                                     disabled={deletingUserId === userData.id}
-                                                    className="inline-flex items-center px-3 py-2 border border-red-200 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="inline-flex items-center px-3 py-1.5 border border-red-900/30 rounded-lg text-sm font-bold text-red-400 bg-red-900/10 hover:bg-red-900/20 hover:border-red-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                                 >
                                                     {deletingUserId === userData.id ? (
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600" />
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-400 border-t-transparent" />
                                                     ) : (
                                                         <>
                                                             <Trash2 className="w-4 h-4 mr-1.5" />
@@ -226,7 +257,7 @@ export default function AdminDashboard() {
                                                     )}
                                                 </button>
                                             ) : (
-                                                <span className="text-sm text-secondary-400 font-medium">
+                                                <span className="text-xs font-bold text-slate-600 italic px-2">
                                                     Current User
                                                 </span>
                                             )}
@@ -239,57 +270,14 @@ export default function AdminDashboard() {
                 </div>
 
                 {users.length === 0 && !loading && (
-                    <div className="p-12 text-center">
-                        <Users className="w-16 h-16 text-secondary-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-secondary-700 mb-2">No users found</h3>
-                        <p className="text-secondary-500">There are no registered users yet.</p>
+                    <div className="p-16 text-center">
+                        <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Users className="w-10 h-10 text-slate-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-1">No users found</h3>
+                        <p className="text-slate-500">There are no registered users in the system yet.</p>
                     </div>
                 )}
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div className="bg-white rounded-xl shadow-sm border border-secondary-200 p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-secondary-600">Admins</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
-                                {users.filter(u => u.role === 'admin').length}
-                            </p>
-                        </div>
-                        <div className="bg-purple-100 p-3 rounded-xl">
-                            <Shield className="w-6 h-6 text-purple-600" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-secondary-200 p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-secondary-600">Teachers</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
-                                {users.filter(u => u.role === 'teacher').length}
-                            </p>
-                        </div>
-                        <div className="bg-blue-100 p-3 rounded-xl">
-                            <UserCheck className="w-6 h-6 text-blue-600" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-secondary-200 p-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-secondary-600">Students</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">
-                                {users.filter(u => u.role === 'student').length}
-                            </p>
-                        </div>
-                        <div className="bg-green-100 p-3 rounded-xl">
-                            <GraduationCap className="w-6 h-6 text-green-600" />
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

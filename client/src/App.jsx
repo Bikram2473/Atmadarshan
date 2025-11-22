@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import Home from './pages/Dashboard/Home';
-
+import ChatWindow from './pages/Chat/ChatWindow';
 import Classes from './pages/Classes/Classes';
 import Payments from './pages/Payments/Payments';
 import Settings from './pages/Settings/Settings';
@@ -38,7 +39,7 @@ const AdminBlockedRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
@@ -51,7 +52,7 @@ function App() {
             </ProtectedRoute>
           }>
             <Route index element={<Home />} />
-
+            <Route path="chat" element={<ChatWindow />} />
             <Route path="classes" element={<Classes />} />
             <Route path="payments" element={<Payments />} />
             <Route path="settings" element={<Settings />} />
@@ -59,7 +60,7 @@ function App() {
           </Route>
         </Routes>
       </Router>
-    </AuthProvider>
+    </ThemeProvider>
   );
 }
 

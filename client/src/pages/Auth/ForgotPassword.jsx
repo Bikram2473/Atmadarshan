@@ -76,112 +76,154 @@ export default function ForgotPassword() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-            <div
-                className="absolute inset-0 z-0"
-                style={{
-                    backgroundImage: `url(${authBg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
-            >
-                <div className="absolute inset-0 bg-primary-900/30 backdrop-blur-sm"></div>
+        <div className="min-h-screen flex bg-slate-900">
+            {/* Left Side - Image & Brand */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-900">
+                <div
+                    className="absolute inset-0 z-0"
+                    style={{
+                        backgroundImage: `url(${authBg})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                    }}
+                >
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]"></div>
+                </div>
+
+                <div className="relative z-10 w-full flex flex-col justify-between p-12 text-white">
+                    <div>
+                        <img src={logo} alt="Atmadarshan Logo" className="w-16 h-16 rounded-full shadow-lg mb-6 ring-2 ring-slate-500" />
+                        <h1 className="text-4xl font-heading font-bold mb-4">Account Recovery</h1>
+                        <p className="text-slate-300 text-lg max-w-md">
+                            "Peace comes from within. Do not seek it without."
+                        </p>
+                    </div>
+                    <div className="text-sm text-slate-400">
+                        © {new Date().getFullYear()} Atmadarshan Yoga. All rights reserved.
+                    </div>
+                </div>
             </div>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="relative z-10 w-full max-w-md p-8 mx-4"
-            >
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8">
+            {/* Right Side - Forgot Password Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-md bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700"
+                >
                     <div className="text-center mb-8">
-                        <img src={logo} alt="Atmadarshan Logo" className="w-24 h-24 mx-auto mb-4 rounded-full shadow-lg" />
-                        <h2 className="text-3xl font-heading font-bold text-white mb-2">
-                            Reset Password
-                        </h2>
-                        <p className="text-primary-100">
-                            {step === 1 ? 'Enter your email address' : 'Answer your security question'}
+                        <h2 className="text-3xl font-heading font-bold text-white mb-2">Reset Password</h2>
+                        <p className="text-slate-400">
+                            {step === 1 ? 'Enter your email address to continue' : 'Answer your security question'}
                         </p>
                     </div>
 
                     {error && (
-                        <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-2 rounded-lg text-sm mb-4 flex items-center">
-                            <AlertCircle size={16} className="mr-2" />
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="bg-red-900/20 border border-red-900/50 text-red-400 px-4 py-3 rounded-lg text-sm flex items-center gap-2 mb-6"
+                        >
+                            <AlertCircle size={16} />
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
                     {step === 1 ? (
-                        <form onSubmit={handleEmailSubmit} className="space-y-4">
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                    <Mail className="h-5 w-5 text-primary-200" />
+                        <form onSubmit={handleEmailSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Mail className="h-5 w-5 text-slate-500 group-focus-within:text-primary-400 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        required
+                                        className="block w-full pl-10 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
                                 </div>
-                                <input
-                                    type="email"
-                                    required
-                                    className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-primary-200 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
                             </div>
                             <button
                                 type="submit"
-                                className="w-full flex items-center justify-center py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transform hover:-translate-y-0.5 transition-all"
+                                className="w-full flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-primary-700 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transform transition-all duration-200 shadow-lg shadow-primary-900/20"
                             >
                                 Continue
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </button>
                         </form>
                     ) : (
-                        <form onSubmit={handleResetSubmit} className="space-y-4">
-                            <div className="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
-                                <div className="flex items-start">
-                                    <HelpCircle className="h-5 w-5 text-accent-400 mr-2 mt-0.5 flex-shrink-0" />
-                                    <p className="text-sm text-primary-100">{securityQuestion}</p>
+                        <form onSubmit={handleResetSubmit} className="space-y-6">
+                            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <HelpCircle className="h-5 w-5 text-primary-400 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-primary-400 font-bold uppercase tracking-wider mb-1">Security Question</p>
+                                        <p className="text-sm font-medium text-white">{securityQuestion}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    required
-                                    className="block w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-primary-200 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                    placeholder="Your answer"
-                                    value={securityAnswer}
-                                    onChange={(e) => setSecurityAnswer(e.target.value)}
-                                />
-                            </div>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                    <Lock className="h-5 w-5 text-primary-200" />
+
+                            <div className="space-y-5">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Security Answer</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-primary-400 transition-colors" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            required
+                                            className="block w-full pl-10 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="Your answer"
+                                            value={securityAnswer}
+                                            onChange={(e) => setSecurityAnswer(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <input
-                                    type="password"
-                                    required
-                                    className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-primary-200 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                    placeholder="New password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                />
-                            </div>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                    <Lock className="h-5 w-5 text-primary-200" />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">New Password</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-primary-400 transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="block w-full pl-10 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="New password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                        />
+                                    </div>
                                 </div>
-                                <input
-                                    type="password"
-                                    required
-                                    className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-primary-200 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                                    placeholder="Confirm new password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Confirm New Password</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <Lock className="h-5 w-5 text-slate-500 group-focus-within:text-primary-400 transition-colors" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="block w-full pl-10 pr-3 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="Confirm new password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
                             </div>
+
                             <button
                                 type="submit"
-                                className="w-full flex items-center justify-center py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transform hover:-translate-y-0.5 transition-all"
+                                className="w-full flex items-center justify-center py-3.5 px-4 border border-transparent rounded-xl text-sm font-bold text-white bg-primary-700 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transform transition-all duration-200 shadow-lg shadow-primary-900/20"
                             >
                                 Reset Password
                                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -190,12 +232,18 @@ export default function ForgotPassword() {
                     )}
 
                     <div className="text-center mt-6">
-                        <Link to="/login" className="text-primary-100 hover:text-white text-sm font-medium">
-                            Back to <span className="text-accent-400 hover:text-accent-300 underline">Sign in</span>
-                        </Link>
+                        <p className="text-sm text-slate-400">
+                            Remember your password?{' '}
+                            <Link
+                                to="/login"
+                                className="font-bold text-primary-400 hover:text-primary-300 transition-colors"
+                            >
+                                Sign in
+                            </Link>
+                        </p>
                     </div>
-                </div>
-            </motion.div>
+                </motion.div>
+            </div>
         </div>
     );
 }

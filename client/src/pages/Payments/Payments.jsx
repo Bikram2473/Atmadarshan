@@ -36,91 +36,108 @@ export default function Payments() {
     };
 
     return (
-        <div className="p-6 max-w-2xl mx-auto mt-10">
+        <div className="p-6 max-w-3xl mx-auto">
+            <div className="mb-8 text-center">
+                <h1 className="text-3xl font-heading font-bold text-primary-900 dark:text-white">Fee Payment</h1>
+                <p className="text-secondary-500 dark:text-slate-400 mt-2">Securely pay your fees using any UPI application</p>
+            </div>
+
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white p-8 rounded-2xl shadow-xl border border-secondary-200 relative overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-secondary-200 dark:border-slate-700 overflow-hidden relative"
             >
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary-400 to-primary-600"></div>
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary-600 to-accent-500"></div>
 
-                <div className="text-center mb-8">
-                    <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                        <QrCode size={40} className="text-primary-600" />
+                <div className="p-8 md:p-10">
+                    <div className="text-center mb-8">
+                        <div className="w-24 h-24 bg-secondary-100 dark:bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-secondary-200 dark:border-slate-700">
+                            <QrCode size={48} className="text-primary-600 dark:text-primary-400" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-primary-900 dark:text-white">Scan to Pay</h2>
+                        <p className="text-secondary-500 dark:text-slate-400 text-sm mt-1">Use Google Pay, PhonePe, Paytm or any UPI app</p>
                     </div>
-                    <h1 className="text-3xl font-heading font-bold text-primary-900">Fee Payment</h1>
-                    <p className="text-secondary-600 mt-2">Scan QR code to pay via any UPI app</p>
-                </div>
 
-                {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                    </div>
-                ) : qrCodeUrl ? (
-                    <div className="space-y-6">
-                        {/* QR Code Display */}
-                        <div className="bg-gradient-to-br from-secondary-50 to-secondary-100 p-8 rounded-2xl border-2 border-dashed border-primary-300">
-                            <div className="bg-white p-6 rounded-xl shadow-lg mx-auto w-fit">
-                                <img
-                                    src={qrCodeUrl}
-                                    alt="Payment QR Code"
-                                    className="w-64 h-64 object-contain mx-auto"
-                                />
+                    {loading ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary-600 border-t-transparent"></div>
+                        </div>
+                    ) : qrCodeUrl ? (
+                        <div className="space-y-8">
+                            {/* QR Code Display */}
+                            <div className="flex justify-center">
+                                <div className="p-4 bg-white rounded-2xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_0_40px_-10px_rgba(0,0,0,0.3)] border border-secondary-200 dark:border-slate-600">
+                                    <div className="relative">
+                                        <img
+                                            src={qrCodeUrl}
+                                            alt="Payment QR Code"
+                                            className="w-64 h-64 object-contain"
+                                        />
+                                        <div className="absolute inset-0 border-[3px] border-primary-900/10 rounded-lg pointer-events-none"></div>
+                                        {/* Corner accents */}
+                                        <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-primary-600 rounded-tl-lg"></div>
+                                        <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-primary-600 rounded-tr-lg"></div>
+                                        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-primary-600 rounded-bl-lg"></div>
+                                        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-primary-600 rounded-br-lg"></div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Instructions */}
-                        <div className="bg-primary-50 p-6 rounded-xl border border-primary-200">
-                            <h3 className="font-bold text-primary-900 mb-4 flex items-center">
-                                <Smartphone size={20} className="mr-2" />
-                                How to Pay
-                            </h3>
-                            <ol className="space-y-2 text-secondary-700 text-sm">
-                                <li className="flex items-start">
-                                    <span className="bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">1</span>
-                                    <span>Open any UPI app (Google Pay, PhonePe, Paytm, etc.)</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">2</span>
-                                    <span>Tap on <strong>Scan QR code</strong> option</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">3</span>
-                                    <span>Scan the QR code shown above</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="bg-primary-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">4</span>
-                                    <span>Enter the amount and complete the payment</span>
-                                </li>
-                            </ol>
-                        </div>
+                            {/* Instructions */}
+                            <div className="bg-secondary-50 dark:bg-slate-900/50 p-6 rounded-xl border border-secondary-200 dark:border-slate-700">
+                                <h3 className="font-bold text-primary-900 dark:text-white mb-4 flex items-center text-sm uppercase tracking-wider">
+                                    <Smartphone size={18} className="mr-2 text-primary-600 dark:text-primary-400" />
+                                    Payment Instructions
+                                </h3>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="flex items-start p-3 bg-white dark:bg-slate-800 rounded-lg border border-secondary-200 dark:border-slate-700 shadow-sm">
+                                        <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5 border border-primary-200 dark:border-primary-900/50">1</span>
+                                        <span className="text-sm text-secondary-700 dark:text-slate-300 font-medium">Open any UPI app on your phone</span>
+                                    </div>
+                                    <div className="flex items-start p-3 bg-white dark:bg-slate-800 rounded-lg border border-secondary-200 dark:border-slate-700 shadow-sm">
+                                        <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5 border border-primary-200 dark:border-primary-900/50">2</span>
+                                        <span className="text-sm text-secondary-700 dark:text-slate-300 font-medium">Select "Scan QR Code" option</span>
+                                    </div>
+                                    <div className="flex items-start p-3 bg-white dark:bg-slate-800 rounded-lg border border-secondary-200 dark:border-slate-700 shadow-sm">
+                                        <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5 border border-primary-200 dark:border-primary-900/50">3</span>
+                                        <span className="text-sm text-secondary-700 dark:text-slate-300 font-medium">Scan the code shown above</span>
+                                    </div>
+                                    <div className="flex items-start p-3 bg-white dark:bg-slate-800 rounded-lg border border-secondary-200 dark:border-slate-700 shadow-sm">
+                                        <span className="bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5 border border-primary-200 dark:border-primary-900/50">4</span>
+                                        <span className="text-sm text-secondary-700 dark:text-slate-300 font-medium">Enter amount & complete payment</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                        {/* Download Button */}
-                        <button
-                            onClick={handleDownloadQR}
-                            className="w-full py-4 px-6 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all shadow-lg shadow-primary-900/20 hover:shadow-xl hover:-translate-y-0.5 flex justify-center items-center text-lg"
-                        >
-                            <Download size={20} className="mr-2" />
-                            Download QR Code
-                        </button>
+                            {/* Download Button */}
+                            <button
+                                onClick={handleDownloadQR}
+                                className="w-full py-4 px-6 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex justify-center items-center text-base tracking-wide"
+                            >
+                                <Download size={20} className="mr-2" />
+                                Download QR Code
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 bg-secondary-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-secondary-300 dark:border-slate-600">
+                            <div className="w-16 h-16 bg-secondary-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-secondary-200 dark:border-slate-700">
+                                <QrCode size={32} className="text-secondary-400 dark:text-slate-500" />
+                            </div>
+                            <h3 className="text-lg font-bold text-primary-900 dark:text-slate-300 mb-1">No QR Code Available</h3>
+                            <p className="text-secondary-500 dark:text-slate-500 text-sm max-w-xs mx-auto">
+                                {user.role === 'teacher'
+                                    ? 'Please upload a payment QR code in the Settings page.'
+                                    : 'Please contact your teacher to set up the payment QR code.'}
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="mt-8 pt-6 border-t border-secondary-200 dark:border-slate-700 text-center">
+                        <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-xs font-bold border border-green-200 dark:border-green-900/30">
+                            <ShieldCheck size={14} className="mr-1.5" />
+                            100% Secure Payment via UPI
+                        </div>
                     </div>
-                ) : (
-                    <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <QrCode size={32} className="text-secondary-400" />
-                        </div>
-                        <h3 className="text-xl font-bold text-secondary-700 mb-2">No QR Code Available</h3>
-                        <p className="text-secondary-500">
-                            {user.role === 'teacher'
-                                ? 'Please upload a payment QR code in Settings'
-                                : 'Please contact your teacher to set up payment QR code'}
-                        </p>
-                    </div>
-                )}
-
-                <div className="mt-8 text-center flex items-center justify-center text-xs text-secondary-400 bg-secondary-50 py-3 rounded-lg">
-                    <ShieldCheck size={14} className="mr-1.5 text-primary-500" />
-                    Secure UPI payments. All major UPI apps supported.
                 </div>
             </motion.div>
         </div>

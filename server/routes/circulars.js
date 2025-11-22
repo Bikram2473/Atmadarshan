@@ -39,14 +39,15 @@ router.post('/', upload.single('file'), async (req, res) => {
     const { title, content, authorName } = req.body;
     const file = req.file;
 
-    if (!title || !content) {
-        return res.status(400).json({ message: 'Title and content are required' });
+    // Require either (title AND content) OR a file attachment
+    if (!file && (!title || !content)) {
+        return res.status(400).json({ message: 'Either provide title and content, or attach a file' });
     }
 
     const newCircular = {
         id: nanoid(),
-        title,
-        content,
+        title: title || (file ? file.originalname : 'Untitled'),
+        content: content || '',
         authorName,
         createdAt: new Date().toISOString(),
         fileUrl: file ? `/uploads/${file.filename}` : null,

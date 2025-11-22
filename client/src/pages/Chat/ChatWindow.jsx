@@ -302,23 +302,23 @@ export default function ChatWindow() {
     };
 
     return (
-        <div className="flex h-[calc(100vh-64px)] bg-gray-50">
+        <div className="flex h-[calc(100vh-64px)] bg-white dark:bg-slate-900 overflow-hidden">
             {/* Sidebar */}
-            <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-primary-900">Messages</h2>
+            <div className="w-80 bg-white dark:bg-slate-800 border-r border-secondary-200 dark:border-slate-700 flex flex-col shadow-sm z-10">
+                <div className="p-5 border-b border-secondary-200 dark:border-slate-700 flex justify-between items-center bg-secondary-50/50 dark:bg-slate-800/30">
+                    <h2 className="text-xl font-heading font-bold text-primary-900 dark:text-white">Messages</h2>
                     {!isAdmin && (
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setShowNewGroupModal(true)}
-                                className="p-2 text-secondary-500 hover:text-primary-600 hover:bg-secondary-50 rounded-full transition-colors"
+                                className="p-2 text-secondary-400 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-secondary-100 dark:hover:bg-slate-700 rounded-lg transition-all"
                                 title="New Group"
                             >
                                 <Users size={20} />
                             </button>
                             <button
                                 onClick={() => setShowNewDMModal(true)}
-                                className="p-2 text-secondary-500 hover:text-primary-600 hover:bg-secondary-50 rounded-full transition-colors"
+                                className="p-2 text-secondary-400 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-secondary-100 dark:hover:bg-slate-700 rounded-lg transition-all"
                                 title="New Message"
                             >
                                 <UserPlus size={20} />
@@ -329,66 +329,82 @@ export default function ChatWindow() {
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {chats.length === 0 ? (
-                        <div className="p-8 text-center text-secondary-400">
-                            <MessageSquare size={48} className="mx-auto mb-2 opacity-20" />
-                            <p>No chats yet. Start a conversation.</p>
+                        <div className="p-8 text-center flex flex-col items-center justify-center h-full text-secondary-500 dark:text-slate-500">
+                            <div className="w-16 h-16 bg-secondary-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                                <MessageSquare size={32} className="opacity-50" />
+                            </div>
+                            <p className="font-medium text-secondary-400 dark:text-slate-400">No chats yet</p>
+                            <p className="text-sm mt-1">Start a conversation to connect</p>
                         </div>
                     ) : (
-                        chats.map(chat => (
-                            <div
-                                key={chat.id}
-                                onClick={() => setActiveChat(chat)}
-                                className={clsx(
-                                    "p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-3",
-                                    activeChat?.id === chat.id && "bg-primary-50"
-                                )}
-                            >
-                                <div className={clsx(
-                                    "w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0",
-                                    chat.isGroup ? "bg-primary-500" : "bg-gradient-to-br from-purple-500 to-pink-500"
-                                )}>
-                                    {chat.isGroup ? <Users size={20} /> : getChatInitial(chat)}
+                        <div className="divide-y divide-secondary-100 dark:divide-slate-700/50">
+                            {chats.map(chat => (
+                                <div
+                                    key={chat.id}
+                                    onClick={() => setActiveChat(chat)}
+                                    className={clsx(
+                                        "p-4 cursor-pointer hover:bg-secondary-50 dark:hover:bg-slate-700/50 transition-all flex items-center gap-4 border-l-4",
+                                        activeChat?.id === chat.id
+                                            ? "bg-primary-50 dark:bg-slate-700/30 border-primary-500"
+                                            : "border-transparent"
+                                    )}
+                                >
+                                    <div className={clsx(
+                                        "w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shrink-0 shadow-sm",
+                                        chat.isGroup ? "bg-primary-600 dark:bg-primary-700" : "bg-accent-500 dark:bg-accent-600"
+                                    )}>
+                                        {chat.isGroup ? <Users size={20} /> : getChatInitial(chat)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className={clsx(
+                                            "font-bold truncate text-sm",
+                                            activeChat?.id === chat.id ? "text-primary-900 dark:text-white" : "text-secondary-700 dark:text-slate-300"
+                                        )}>
+                                            {getChatName(chat)}
+                                        </h3>
+                                        <p className="text-xs text-secondary-500 dark:text-slate-500 truncate mt-0.5">
+                                            {chat.isGroup ? 'Group Chat' : 'Direct Message'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-gray-900 truncate">
-                                        {getChatName(chat)}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 truncate">
-                                        {chat.isGroup ? 'Group Chat' : 'Direct Message'}
-                                    </p>
-                                </div>
-                            </div>
-                        ))
+                            ))}
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-[#efeae2]">
+            <div className="flex-1 flex flex-col bg-secondary-50 dark:bg-slate-950 relative">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                    style={{ backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
+                </div>
+
                 {activeChat ? (
                     <>
                         {/* Header */}
-                        <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center shadow-sm z-10">
-                            <div className="flex items-center">
+                        <div className="p-4 border-b border-secondary-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center shadow-sm z-20 relative">
+                            <div className="flex items-center gap-4">
                                 <div className={clsx(
-                                    "w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3",
-                                    activeChat.isGroup ? "bg-primary-500" : "bg-gradient-to-br from-purple-500 to-pink-500"
+                                    "w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-sm",
+                                    activeChat.isGroup ? "bg-primary-600 dark:bg-primary-700" : "bg-accent-500 dark:bg-accent-600"
                                 )}>
                                     {activeChat.isGroup ? <Users size={20} /> : getChatInitial(activeChat)}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary-900">{getChatName(activeChat)}</h3>
-                                    <p className="text-xs text-secondary-500">
-                                        {activeChat.isGroup ? 'Group' : 'Direct Message'}
-                                    </p>
+                                    <h3 className="font-heading font-bold text-primary-900 dark:text-white text-lg">{getChatName(activeChat)}</h3>
+                                    <div className="flex items-center gap-2 text-xs text-secondary-500 dark:text-slate-400">
+                                        <span className={clsx("w-2 h-2 rounded-full", activeChat.isGroup ? "bg-primary-500" : "bg-green-500")}></span>
+                                        {activeChat.isGroup ? 'Group Conversation' : 'Online'}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 {isAdmin && (
-                                    <div className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium flex items-center gap-1">
-                                        <Shield size={12} />
-                                        Read Only
+                                    <div className="px-3 py-1.5 bg-secondary-100 dark:bg-slate-700 text-secondary-600 dark:text-slate-300 rounded-lg text-xs font-bold flex items-center gap-1.5 border border-secondary-200 dark:border-slate-600">
+                                        <Shield size={14} />
+                                        Read Only Mode
                                     </div>
                                 )}
 
@@ -396,21 +412,21 @@ export default function ChatWindow() {
                                     <div className="relative">
                                         <button
                                             onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                                            className="text-secondary-400 hover:text-primary-600 p-2 hover:bg-secondary-50 rounded-full transition-all"
+                                            className="text-secondary-400 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 p-2 hover:bg-secondary-100 dark:hover:bg-slate-700 rounded-lg transition-all"
                                         >
                                             <MoreVertical size={20} />
                                         </button>
                                         {showOptionsMenu && (
-                                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-secondary-200 overflow-hidden z-20">
+                                            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-secondary-200 dark:border-slate-700 overflow-hidden z-30 py-1">
                                                 <button
                                                     onClick={() => {
                                                         setShowGroupInfo(true);
                                                         setShowOptionsMenu(false);
                                                     }}
-                                                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-2 text-secondary-700"
+                                                    className="w-full px-4 py-3 text-left hover:bg-secondary-50 dark:hover:bg-slate-700 flex items-center gap-3 text-secondary-700 dark:text-slate-300 text-sm font-medium transition-colors"
                                                 >
-                                                    <Info size={16} />
-                                                    Group Info
+                                                    <Info size={18} className="text-secondary-400 dark:text-slate-400" />
+                                                    Group Information
                                                 </button>
 
                                                 {!isAdmin && (
@@ -418,17 +434,17 @@ export default function ChatWindow() {
                                                         {activeChat.createdBy === user.id && (
                                                             <button
                                                                 onClick={deleteGroup}
-                                                                className="w-full px-4 py-3 text-left hover:bg-red-50 flex items-center gap-2 text-red-600"
+                                                                className="w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3 text-red-500 dark:text-red-400 text-sm font-medium transition-colors border-t border-secondary-100 dark:border-slate-700"
                                                             >
-                                                                <Trash2 size={16} />
+                                                                <Trash2 size={18} />
                                                                 Delete Group
                                                             </button>
                                                         )}
                                                         <button
                                                             onClick={leaveGroup}
-                                                            className="w-full px-4 py-3 text-left hover:bg-orange-50 flex items-center gap-2 text-orange-600"
+                                                            className="w-full px-4 py-3 text-left hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-3 text-orange-500 dark:text-orange-400 text-sm font-medium transition-colors border-t border-secondary-100 dark:border-slate-700"
                                                         >
-                                                            <LogOut size={16} />
+                                                            <LogOut size={18} />
                                                             Leave Group
                                                         </button>
                                                     </>
@@ -441,33 +457,38 @@ export default function ChatWindow() {
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar z-10">
                             {messages.map((msg, idx) => {
                                 const isMe = msg.senderId === user.id;
+                                const showAvatar = !isMe && (idx === 0 || messages[idx - 1].senderId !== msg.senderId);
+
                                 return (
                                     <div
                                         key={idx}
                                         className={clsx(
-                                            "flex flex-col max-w-[70%]",
+                                            "flex flex-col max-w-[75%]",
                                             isMe ? "ml-auto items-end" : "mr-auto items-start"
                                         )}
                                     >
-                                        {!isMe && activeChat.isGroup && (
-                                            <span className="text-xs text-gray-500 mb-1 ml-1">{msg.senderName}</span>
+                                        {!isMe && activeChat.isGroup && showAvatar && (
+                                            <span className="text-xs font-bold text-secondary-500 dark:text-slate-400 mb-1 ml-1">{msg.senderName}</span>
                                         )}
                                         <div
                                             className={clsx(
-                                                "px-4 py-2 rounded-lg shadow-sm break-words",
+                                                "px-5 py-3 shadow-sm text-sm leading-relaxed relative group",
                                                 isMe
-                                                    ? "bg-primary-600 text-white rounded-tr-none"
-                                                    : "bg-white text-gray-800 rounded-tl-none"
+                                                    ? "bg-primary-600 dark:bg-primary-700 text-white rounded-2xl rounded-tr-sm"
+                                                    : "bg-white dark:bg-slate-800 text-secondary-700 dark:text-slate-200 rounded-2xl rounded-tl-sm border border-secondary-200 dark:border-slate-700"
                                             )}
                                         >
                                             {msg.content}
+                                            <span className={clsx(
+                                                "text-[10px] absolute bottom-1 right-3 opacity-0 group-hover:opacity-70 transition-opacity",
+                                                isMe ? "text-primary-100 dark:text-primary-200" : "text-secondary-400 dark:text-slate-400"
+                                            )}>
+                                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
                                         </div>
-                                        <span className="text-[10px] text-gray-500 mt-1 px-1">
-                                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
                                     </div>
                                 );
                             })}
@@ -476,19 +497,19 @@ export default function ChatWindow() {
 
                         {/* Input Area */}
                         {!isAdmin && (
-                            <div className="p-4 bg-white border-t border-gray-200">
-                                <form onSubmit={sendMessage} className="flex gap-2">
+                            <div className="p-4 bg-white dark:bg-slate-800 border-t border-secondary-200 dark:border-slate-700 z-20">
+                                <form onSubmit={sendMessage} className="flex gap-3 items-center max-w-4xl mx-auto">
                                     <input
                                         type="text"
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
-                                        placeholder="Type a message..."
-                                        className="flex-1 px-4 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                                        placeholder="Type your message..."
+                                        className="flex-1 px-6 py-3.5 bg-secondary-50 dark:bg-slate-900 rounded-xl border border-secondary-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all placeholder-secondary-400 dark:placeholder-slate-500 text-primary-900 dark:text-white"
                                     />
                                     <button
                                         type="submit"
                                         disabled={!newMessage.trim()}
-                                        className="p-3 bg-primary-600 text-white rounded-full hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+                                        className="p-3.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                                     >
                                         <Send size={20} />
                                     </button>
@@ -496,15 +517,19 @@ export default function ChatWindow() {
                             </div>
                         )}
                         {isAdmin && (
-                            <div className="p-4 bg-gray-100 border-t border-gray-200 text-center text-gray-500 text-sm">
-                                Read-only view. Admins cannot send messages.
+                            <div className="p-4 bg-white dark:bg-slate-800 border-t border-secondary-200 dark:border-slate-700 text-center text-secondary-500 dark:text-slate-400 text-sm font-medium z-20">
+                                <Shield size={16} className="inline mr-2 -mt-0.5" />
+                                Read-only view. Administrators cannot send messages.
                             </div>
                         )}
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-secondary-400">
-                        <MessageSquare size={64} className="mb-4 opacity-20" />
-                        <p className="text-lg">Select a chat to start messaging</p>
+                    <div className="flex-1 flex flex-col items-center justify-center text-secondary-500 dark:text-slate-500 z-10">
+                        <div className="w-24 h-24 bg-secondary-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 shadow-sm border border-secondary-200 dark:border-slate-700">
+                            <MessageSquare size={40} className="text-secondary-400 dark:text-slate-600" />
+                        </div>
+                        <h3 className="text-xl font-heading font-bold text-primary-900 dark:text-white mb-2">Welcome to Messages</h3>
+                        <p className="text-secondary-500 dark:text-slate-400 max-w-xs text-center">Select a conversation from the sidebar or start a new chat to begin messaging.</p>
                     </div>
                 )}
             </div>
@@ -555,54 +580,54 @@ function NewGroupForm({ users, onClose, onCreate }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-primary-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-xl shadow-xl w-full max-w-md p-6"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
             >
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">Create New Group</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <div className="p-6 border-b border-secondary-100 dark:border-slate-700 flex justify-between items-center bg-secondary-50/50 dark:bg-slate-800/50">
+                    <h3 className="text-xl font-heading font-bold text-primary-900 dark:text-white">Create New Group</h3>
+                    <button onClick={onClose} className="text-secondary-400 dark:text-slate-400 hover:text-secondary-600 dark:hover:text-slate-200 transition-colors">
                         <X size={24} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Group Name</label>
+                <form onSubmit={handleSubmit} className="p-6">
+                    <div className="mb-6">
+                        <label className="block text-sm font-bold text-primary-700 dark:text-slate-300 mb-2">Group Name</label>
                         <input
                             type="text"
                             value={groupName}
                             onChange={(e) => setGroupName(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            className="w-full px-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-900 transition-all placeholder-secondary-300 dark:placeholder-slate-500 text-primary-900 dark:text-white"
                             placeholder="Enter group name"
                             required
                         />
                     </div>
 
                     <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Select Members</label>
-                        <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+                        <label className="block text-sm font-bold text-primary-700 dark:text-slate-300 mb-2">Select Members</label>
+                        <div className="max-h-60 overflow-y-auto border border-secondary-200 dark:border-slate-600 rounded-xl divide-y divide-secondary-100 dark:divide-slate-700 custom-scrollbar">
                             {users.map(u => (
                                 <div
                                     key={u.id}
                                     onClick={() => toggleUser(u.id)}
                                     className={clsx(
-                                        "p-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50",
-                                        selectedUsers.includes(u.id) && "bg-primary-50"
+                                        "p-3 flex items-center gap-3 cursor-pointer hover:bg-secondary-50 dark:hover:bg-slate-700 transition-colors",
+                                        selectedUsers.includes(u.id) && "bg-primary-50 dark:bg-primary-900/30"
                                     )}
                                 >
                                     <div className={clsx(
-                                        "w-5 h-5 rounded border flex items-center justify-center",
-                                        selectedUsers.includes(u.id) ? "bg-primary-600 border-primary-600" : "border-gray-300"
+                                        "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                        selectedUsers.includes(u.id) ? "bg-primary-600 border-primary-600 dark:bg-primary-500 dark:border-primary-500" : "border-secondary-300 dark:border-slate-500 bg-white dark:bg-slate-800"
                                     )}>
                                         {selectedUsers.includes(u.id) && <div className="w-2 h-2 bg-white rounded-full" />}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-gray-900">{u.name}</p>
-                                        <p className="text-xs text-gray-500 capitalize">{u.role}</p>
+                                        <p className="font-bold text-primary-900 dark:text-white text-sm">{u.name}</p>
+                                        <p className="text-xs text-secondary-500 dark:text-slate-400 capitalize">{u.role}</p>
                                     </div>
                                 </div>
                             ))}
@@ -612,7 +637,7 @@ function NewGroupForm({ users, onClose, onCreate }) {
                     <button
                         type="submit"
                         disabled={!groupName.trim() || selectedUsers.length === 0}
-                        className="w-full py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="w-full py-3 bg-primary-900 dark:bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-800 dark:hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
                     >
                         Create Group
                     </button>
@@ -636,41 +661,44 @@ function DMSelector({ users, onClose, onSelect }) {
     });
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-primary-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-xl shadow-xl w-full max-w-md p-6"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
             >
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">New Message</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <div className="p-6 border-b border-secondary-100 dark:border-slate-700 flex justify-between items-center bg-secondary-50/50 dark:bg-slate-800/50">
+                    <h3 className="text-xl font-heading font-bold text-primary-900 dark:text-white">New Message</h3>
+                    <button onClick={onClose} className="text-secondary-400 dark:text-slate-400 hover:text-secondary-600 dark:hover:text-slate-200 transition-colors">
                         <X size={24} />
                     </button>
                 </div>
 
-                <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+                <div className="max-h-96 overflow-y-auto p-2 custom-scrollbar">
                     {filteredUsers.length === 0 && (
-                        <div className="p-4 text-center text-gray-500">
-                            {user.role === 'student' ? 'No teachers available' : 'No students available'}
+                        <div className="p-8 text-center text-secondary-500 dark:text-slate-400">
+                            <UserPlus size={32} className="mx-auto mb-2 opacity-30" />
+                            <p>{user.role === 'student' ? 'No teachers available' : 'No students available'}</p>
                         </div>
                     )}
-                    {filteredUsers.map(u => (
-                        <div
-                            key={u.id}
-                            onClick={() => onSelect(u.id)}
-                            className="p-4 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors"
-                        >
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold">
-                                {u.name[0].toUpperCase()}
+                    <div className="space-y-1">
+                        {filteredUsers.map(u => (
+                            <div
+                                key={u.id}
+                                onClick={() => onSelect(u.id)}
+                                className="p-3 hover:bg-secondary-50 dark:hover:bg-slate-700 cursor-pointer flex items-center gap-4 transition-all rounded-xl group"
+                            >
+                                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-400 font-bold group-hover:bg-primary-600 dark:group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                    {u.name[0].toUpperCase()}
+                                </div>
+                                <div>
+                                    <p className="font-bold text-primary-900 dark:text-white">{u.name}</p>
+                                    <p className="text-xs text-secondary-500 dark:text-slate-400 capitalize">{u.role}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="font-medium text-gray-900">{u.name}</p>
-                                <p className="text-xs text-gray-500 capitalize">{u.role}</p>
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </motion.div>
         </div>
@@ -758,123 +786,130 @@ function GroupInfoModal({ groupId, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-primary-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-0 max-h-[90vh] overflow-hidden flex flex-col"
             >
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900">Group Info</h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <div className="p-6 border-b border-secondary-100 dark:border-slate-700 flex justify-between items-center bg-secondary-50/50 dark:bg-slate-800/50 shrink-0">
+                    <h3 className="text-xl font-heading font-bold text-primary-900 dark:text-white">Group Info</h3>
+                    <button onClick={onClose} className="text-secondary-400 dark:text-slate-400 hover:text-secondary-600 dark:hover:text-slate-200 transition-colors">
                         <X size={24} />
                     </button>
                 </div>
 
-                {loading ? (
-                    <div className="text-center py-8 text-gray-500">Loading...</div>
-                ) : groupData ? (
-                    <div>
-                        <div className="text-center mb-6">
-                            <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center text-white mx-auto mb-3">
-                                <Users size={32} />
+                <div className="overflow-y-auto p-6 custom-scrollbar">
+                    {loading ? (
+                        <div className="text-center py-8 text-secondary-500 dark:text-slate-400">
+                            <div className="animate-spin w-8 h-8 border-2 border-primary-600 dark:border-primary-400 border-t-transparent rounded-full mx-auto mb-2"></div>
+                            Loading...
+                        </div>
+                    ) : groupData ? (
+                        <div>
+                            <div className="text-center mb-8">
+                                <div className="w-20 h-20 bg-primary-600 dark:bg-primary-700 rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-primary-900/20">
+                                    <Users size={32} />
+                                </div>
+                                <h4 className="text-2xl font-heading font-bold text-primary-900 dark:text-white">{groupData.name}</h4>
+                                <p className="text-sm text-secondary-500 dark:text-slate-400 font-medium mt-1">{groupData.memberDetails.length} members</p>
                             </div>
-                            <h4 className="text-xl font-bold text-gray-900">{groupData.name}</h4>
-                            <p className="text-sm text-gray-500">{groupData.memberDetails.length} members</p>
-                        </div>
 
-                        <div className="mb-4 flex items-center justify-between">
-                            <div className="font-medium text-gray-700">Members</div>
-                            {isCreator && !showAddMembers && availableUsers.length > 0 && (
-                                <button
-                                    onClick={() => setShowAddMembers(true)}
-                                    className="text-sm px-3 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 flex items-center gap-1 transition-colors"
-                                >
-                                    <UserPlus size={14} />
-                                    Add Members
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Add Members Section */}
-                        {showAddMembers && isCreator && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="mb-4 p-3 bg-primary-50 rounded-lg border border-primary-200"
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <h5 className="font-medium text-gray-900 text-sm">Select New Members</h5>
-                                    <button onClick={() => {
-                                        setShowAddMembers(false);
-                                        setSelectedNewMembers([]);
-                                    }} className="text-gray-400 hover:text-gray-600">
-                                        <X size={18} />
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className="font-bold text-primary-900 dark:text-white text-sm uppercase tracking-wide">Members</div>
+                                {isCreator && !showAddMembers && availableUsers.length > 0 && (
+                                    <button
+                                        onClick={() => setShowAddMembers(true)}
+                                        className="text-xs px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg flex items-center gap-1.5 transition-all font-bold shadow-sm"
+                                    >
+                                        <UserPlus size={14} />
+                                        Add Members
                                     </button>
-                                </div>
-                                <div className="max-h-40 overflow-y-auto border border-primary-200 bg-white rounded-lg divide-y divide-gray-100">
-                                    {availableUsers.length === 0 ? (
-                                        <p className="p-3 text-sm text-gray-500 text-center">All users are already in this group</p>
-                                    ) : (
-                                        availableUsers.map(u => (
-                                            <div
-                                                key={u.id}
-                                                onClick={() => toggleNewMember(u.id)}
-                                                className={clsx(
-                                                    "p-2 flex items-center gap-2 cursor-pointer hover:bg-gray-50",
-                                                    selectedNewMembers.includes(u.id) && "bg-primary-100"
-                                                )}
-                                            >
-                                                <div className={clsx(
-                                                    "w-4 h-4 rounded border flex items-center justify-center",
-                                                    selectedNewMembers.includes(u.id) ? "bg-primary-600 border-primary-600" : "border-gray-300"
-                                                )}>
-                                                    {selectedNewMembers.includes(u.id) && <div className="w-2 h-2 bg-white rounded-full" />}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-gray-900 text-sm">{u.name}</p>
-                                                    <p className="text-xs text-gray-500 capitalize">{u.role}</p>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                                <button
-                                    onClick={handleAddMembers}
-                                    disabled={selectedNewMembers.length === 0 || addingMembers}
-                                    className="w-full mt-2 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-                                >
-                                    {addingMembers ? 'Adding...' : `Add ${selectedNewMembers.length} Member${selectedNewMembers.length !== 1 ? 's' : ''}`}
-                                </button>
-                            </motion.div>
-                        )}
+                                )}
+                            </div>
 
-                        <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
-                            {groupData.memberDetails.map(member => (
-                                <div key={member.id} className="p-3 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xs">
-                                            {member.name[0].toUpperCase()}
+                            {/* Add Members Section */}
+                            <AnimatePresence>
+                                {showAddMembers && isCreator && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="mb-6 p-4 bg-secondary-50 dark:bg-slate-700/30 rounded-xl border border-secondary-200 dark:border-slate-600 overflow-hidden"
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h5 className="font-bold text-primary-900 dark:text-white text-sm">Select New Members</h5>
+                                            <button onClick={() => {
+                                                setShowAddMembers(false);
+                                                setSelectedNewMembers([]);
+                                            }} className="text-secondary-400 dark:text-slate-400 hover:text-secondary-600 dark:hover:text-slate-200">
+                                                <X size={16} />
+                                            </button>
                                         </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900 text-sm">{member.name}</p>
-                                            <p className="text-xs text-gray-500 capitalize">{member.role}</p>
+                                        <div className="max-h-40 overflow-y-auto border border-secondary-200 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-xl divide-y divide-secondary-100 dark:divide-slate-700 custom-scrollbar">
+                                            {availableUsers.length === 0 ? (
+                                                <p className="p-4 text-sm text-secondary-500 dark:text-slate-400 text-center">All users are already in this group</p>
+                                            ) : (
+                                                availableUsers.map(u => (
+                                                    <div
+                                                        key={u.id}
+                                                        onClick={() => toggleNewMember(u.id)}
+                                                        className={clsx(
+                                                            "p-2.5 flex items-center gap-3 cursor-pointer hover:bg-secondary-50 dark:hover:bg-slate-700 transition-colors",
+                                                            selectedNewMembers.includes(u.id) && "bg-primary-50 dark:bg-primary-900/30"
+                                                        )}
+                                                    >
+                                                        <div className={clsx(
+                                                            "w-4 h-4 rounded border flex items-center justify-center transition-all",
+                                                            selectedNewMembers.includes(u.id) ? "bg-primary-600 border-primary-600 dark:bg-primary-500 dark:border-primary-500" : "border-secondary-300 dark:border-slate-500"
+                                                        )}>
+                                                            {selectedNewMembers.includes(u.id) && <div className="w-2 h-2 bg-white rounded-full" />}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="font-bold text-primary-900 dark:text-white text-xs">{u.name}</p>
+                                                            <p className="text-[10px] text-secondary-500 dark:text-slate-400 capitalize">{u.role}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
                                         </div>
+                                        <button
+                                            onClick={handleAddMembers}
+                                            disabled={selectedNewMembers.length === 0 || addingMembers}
+                                            className="w-full mt-3 py-2 bg-primary-900 dark:bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-800 dark:hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-xs shadow-sm"
+                                        >
+                                            {addingMembers ? 'Adding...' : `Add ${selectedNewMembers.length} Member${selectedNewMembers.length !== 1 ? 's' : ''}`}
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <div className="max-h-60 overflow-y-auto border border-secondary-200 dark:border-slate-600 rounded-xl divide-y divide-secondary-100 dark:divide-slate-700 bg-white dark:bg-slate-800 custom-scrollbar">
+                                {groupData.memberDetails.map(member => (
+                                    <div key={member.id} className="p-3 flex items-center justify-between hover:bg-secondary-50 dark:hover:bg-slate-700 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-400 font-bold text-xs">
+                                                {member.name[0].toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-primary-900 dark:text-white text-sm">{member.name}</p>
+                                                <p className="text-xs text-secondary-500 dark:text-slate-400 capitalize">{member.role}</p>
+                                            </div>
+                                        </div>
+                                        {member.id === groupData.createdBy && (
+                                            <span className="px-2 py-0.5 bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400 text-[10px] rounded-full font-bold border border-accent-200 dark:border-accent-800">
+                                                ADMIN
+                                            </span>
+                                        )}
                                     </div>
-                                    {member.id === groupData.createdBy && (
-                                        <span className="px-2 py-1 bg-primary-50 text-primary-700 text-xs rounded-full font-medium">
-                                            Admin
-                                        </span>
-                                    )}
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-red-500">Failed to load group info</div>
-                )}
+                    ) : (
+                        <div className="text-center py-8 text-red-500 font-medium">Failed to load group info</div>
+                    )}
+                </div>
             </motion.div>
         </div>
     );

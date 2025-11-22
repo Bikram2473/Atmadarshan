@@ -35,9 +35,9 @@ router.get('/', async (req, res) => {
 // Get all students (for tagging)
 router.get('/students', async (req, res) => {
     try {
+        console.log('Fetching all students for tagging...');
         const students = await User.find({ role: 'student' }).select('id name email -_id');
-        console.log('Students found:', students.length);
-        console.log('Student data:', students);
+        console.log(`Found ${students.length} students for tagging.`);
         res.json(students);
     } catch (error) {
         console.error('Error fetching students:', error);

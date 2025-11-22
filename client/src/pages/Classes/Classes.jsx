@@ -281,26 +281,33 @@ export default function Classes() {
                                                 }}
                                                 onFocus={() => setShowSuggestions(true)}
                                                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-secondary-200 dark:border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-900 text-primary-900 dark:text-white transition-all placeholder-secondary-400 dark:placeholder-slate-500"
-                                                placeholder="Search students by name or email..."
+                                                placeholder={students.length === 0 ? "No students registered yet" : "Search students by name or email..."}
+                                                disabled={students.length === 0}
                                             />
 
                                             {/* Suggestions Dropdown */}
-                                            {showSuggestions && searchTerm && filteredStudents.length > 0 && (
+                                            {showSuggestions && searchTerm && (
                                                 <div className="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 border border-secondary-200 dark:border-slate-600 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                                                    {filteredStudents.map(student => (
-                                                        <button
-                                                            key={student.id}
-                                                            type="button"
-                                                            onClick={() => addStudent(student)}
-                                                            className="w-full px-4 py-3 text-left hover:bg-secondary-50 dark:hover:bg-slate-700 transition-colors border-b border-secondary-100 dark:border-slate-700 last:border-b-0 flex justify-between items-center group"
-                                                        >
-                                                            <div>
-                                                                <div className="font-bold text-primary-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-300">{student.name}</div>
-                                                                <div className="text-xs text-secondary-500 dark:text-slate-400">{student.email}</div>
-                                                            </div>
-                                                            <Plus size={16} className="text-secondary-400 dark:text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400" />
-                                                        </button>
-                                                    ))}
+                                                    {filteredStudents.length > 0 ? (
+                                                        filteredStudents.map(student => (
+                                                            <button
+                                                                key={student.id}
+                                                                type="button"
+                                                                onClick={() => addStudent(student)}
+                                                                className="w-full px-4 py-3 text-left hover:bg-secondary-50 dark:hover:bg-slate-700 transition-colors border-b border-secondary-100 dark:border-slate-700 last:border-b-0 flex justify-between items-center group"
+                                                            >
+                                                                <div>
+                                                                    <div className="font-bold text-primary-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-300">{student.name}</div>
+                                                                    <div className="text-xs text-secondary-500 dark:text-slate-400">{student.email}</div>
+                                                                </div>
+                                                                <Plus size={16} className="text-secondary-400 dark:text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400" />
+                                                            </button>
+                                                        ))
+                                                    ) : (
+                                                        <div className="px-4 py-3 text-sm text-secondary-500 dark:text-slate-400 text-center">
+                                                            No students found matching "{searchTerm}"
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
@@ -308,6 +315,11 @@ export default function Classes() {
                                             {newClass.taggedStudents.length === 0
                                                 ? "Leave empty to invite all students"
                                                 : `${newClass.taggedStudents.length} student(s) tagged`}
+                                            {students.length === 0 && (
+                                                <span className="text-amber-600 dark:text-amber-400 ml-2 font-medium">
+                                                    (Requires at least 3 registered users to have students)
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
                                 </div>
